@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,29 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    // Check if the URL has an invite hash (implicit flow fallback)
+    if (window.location.hash.includes("type=invite")) {
+      router.push("/update-password");
+    }
+
+    // Set up auth listener in case session is established client-side without redirect
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        if (window.location.hash.includes("type=invite") || window.location.href.includes("update-password")) {
+          router.push("/update-password");
+        } else {
+          router.push("/dashboard");
+          router.refresh();
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase.auth]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
