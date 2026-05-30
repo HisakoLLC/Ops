@@ -34,7 +34,10 @@ export async function POST(req: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabaseAdmin = createSupabaseClient(supabaseUrl, supabaseKey);
 
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email);
+    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${origin}/auth/callback?next=/update-password`,
+    });
 
     if (inviteError) {
       return NextResponse.json({ error: inviteError.message }, { status: 500 });
