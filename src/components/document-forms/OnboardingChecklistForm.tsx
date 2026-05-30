@@ -43,7 +43,7 @@ export function OnboardingChecklistForm({ client, existingData, documentId, docL
   CHECKLIST_ITEMS.forEach(item => defaultChecklist[item] = false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       project_name: existingData?.project_name || "",
       kickoff_date: existingData?.kickoff_date || "",

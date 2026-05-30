@@ -76,7 +76,7 @@ export default function NewClientPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ClientFormValues>({
-    resolver: zodResolver(clientFormSchema),
+    resolver: zodResolver(clientFormSchema) as any,
     defaultValues: {
       ...defaultValues,
       pipeline_stage: defaultStage,

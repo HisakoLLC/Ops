@@ -43,7 +43,7 @@ export function ProposalForm({ client, existingData, documentId, docLabel }: any
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       pipeline_name: existingData?.pipeline_name || "",
       pipeline_description: existingData?.pipeline_description || "",

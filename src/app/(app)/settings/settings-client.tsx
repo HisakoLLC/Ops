@@ -41,7 +41,7 @@ export function SettingsClient({ initialSettings }: any) {
   const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<SettingsValues>({
-    resolver: zodResolver(settingsSchema),
+    resolver: zodResolver(settingsSchema) as any,
     defaultValues: {
       company_name: initialSettings?.company_name || "Hisako Technologies",
       company_email: initialSettings?.company_email || "",

@@ -41,7 +41,7 @@ export function DiscoveryScriptForm({ client, existingData, documentId, docLabel
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       call_date: existingData?.call_date || format(new Date(), "MMMM d, yyyy"),
       pain_point_notes: existingData?.pain_point_notes || "",

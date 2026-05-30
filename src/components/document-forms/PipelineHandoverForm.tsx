@@ -43,7 +43,7 @@ export function PipelineHandoverForm({ client, existingData, documentId, docLabe
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       pipeline_name: existingData?.pipeline_name || "",
       what_it_does: existingData?.what_it_does || "",

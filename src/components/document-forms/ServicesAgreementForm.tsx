@@ -28,7 +28,7 @@ export function ServicesAgreementForm({ client, existingData, documentId, docLab
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       agreement_date: existingData?.agreement_date || format(new Date(), "MMMM d, yyyy"),
       client_country: existingData?.client_country || client.country || "",

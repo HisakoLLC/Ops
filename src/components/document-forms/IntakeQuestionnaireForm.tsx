@@ -21,7 +21,7 @@ export function IntakeQuestionnaireForm({ client, existingData, documentId, docL
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: existingData || {},
   });
 

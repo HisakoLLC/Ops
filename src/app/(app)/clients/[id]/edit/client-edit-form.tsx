@@ -57,7 +57,7 @@ export function ClientEditForm({ initialData }: { initialData: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ClientFormValues>({
-    resolver: zodResolver(clientFormSchema),
+    resolver: zodResolver(clientFormSchema) as any,
     defaultValues: {
       company_name: initialData.company_name || "",
       website: initialData.website || "",

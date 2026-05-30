@@ -45,7 +45,7 @@ export function NDAForm({ client, existingData, documentId, docLabel }: NDAFormP
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       nda_date: existingData?.nda_date || format(new Date(), "MMMM d, yyyy"),
       recipient_name: existingData?.recipient_name || client.contact_name || "",

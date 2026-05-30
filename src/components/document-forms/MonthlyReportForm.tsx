@@ -42,7 +42,7 @@ export function MonthlyReportForm({ client, existingData, documentId, docLabel }
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       report_month: existingData?.report_month || new Date().toLocaleString('default', { month: 'long' }),
       report_year: existingData?.report_year || new Date().getFullYear().toString(),
