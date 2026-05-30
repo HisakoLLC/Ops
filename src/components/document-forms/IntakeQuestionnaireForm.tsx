@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const formSchema = z.record(z.string().optional());
+const formSchema = z.record(z.string(), z.string().optional());
 
 export function IntakeQuestionnaireForm({ client, existingData, documentId, docLabel }: any) {
   const router = useRouter();

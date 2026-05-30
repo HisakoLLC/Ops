@@ -76,7 +76,7 @@ export function AppSidebar() {
           <Avatar className="h-9 w-9 border border-zinc-200 dark:border-zinc-800">
             <AvatarImage src={profile?.avatar_url || ""} />
             <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-xs">
-              {getInitials(profile?.full_name)}
+              {getInitials(profile?.full_name || null)}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-1 flex-col overflow-hidden">

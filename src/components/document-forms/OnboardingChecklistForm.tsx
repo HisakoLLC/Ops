@@ -21,7 +21,7 @@ const formSchema = z.object({
   pm_name: z.string().optional(),
   communication_channel: z.string().optional(),
   tool_access_list: z.string().optional(),
-  checklist_state: z.record(z.boolean()).optional(),
+  checklist_state: z.record(z.string(), z.boolean()).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;

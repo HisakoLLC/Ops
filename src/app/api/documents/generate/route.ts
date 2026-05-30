@@ -3,7 +3,6 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { Packer } from "docx";
 import { buildDocument } from "@/lib/documents";
-import { Database } from "@/types/database";
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
     // Let's use service role for storage reliability as requested by prompt.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createSupabaseClient<Database>(supabaseUrl, supabaseKey);
+    const supabase = createSupabaseClient<any>(supabaseUrl, supabaseKey);
 
     // Fetch client
     const { data: client, error: clientError } = await supabase
