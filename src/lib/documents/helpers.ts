@@ -33,7 +33,7 @@ export const kv = (key: string, value: string | undefined | null) => new Paragra
 
 export const rule = () => new Paragraph({
   border: {
-    bottom: { color: "auto", space: 1, value: BorderStyle.SINGLE, size: 6 },
+    bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 },
   },
   spacing: { after: 200 },
 });
