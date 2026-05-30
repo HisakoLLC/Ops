@@ -23,14 +23,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const settingsSchema = z.object({
-  company_name: z.string().min(1, "Required"),
-  company_email: z.string().email().optional().or(z.literal("")),
-  company_phone: z.string().optional(),
-  company_website: z.string().url().optional().or(z.literal("")),
-  company_address: z.string().optional(),
-  default_currency: z.string().optional(),
-  default_tax_rate: z.coerce.number().optional(),
-  invoice_prefix: z.string().optional(),
+  company_legal_name: z.string().min(1, "Required"),
+  trading_name: z.string().optional(),
+  email: z.string().email().optional().or(z.literal("")),
+  website: z.string().optional().or(z.literal("")),
+  registered_country: z.string().optional(),
+  currency: z.string().optional(),
+  whatsapp_number: z.string().optional(),
+  calendly_url: z.string().url().optional().or(z.literal("")),
+  deposit_percentage: z.coerce.number().optional(),
+  payment_terms_days: z.coerce.number().optional(),
+  late_payment_interest: z.coerce.number().optional(),
+  retainer_notice_days: z.coerce.number().optional(),
 });
 
 type SettingsValues = z.infer<typeof settingsSchema>;
@@ -43,18 +47,22 @@ export function SettingsClient({ initialSettings }: any) {
   const form = useForm<SettingsValues>({
     resolver: zodResolver(settingsSchema) as any,
     defaultValues: {
-      company_name: initialSettings?.company_name || "Hisako Technologies",
-      company_email: initialSettings?.company_email || "",
-      company_phone: initialSettings?.company_phone || "",
-      company_website: initialSettings?.company_website || "https://hisako.com",
-      company_address: initialSettings?.company_address || "",
-      default_currency: initialSettings?.default_currency || "USD",
-      default_tax_rate: initialSettings?.default_tax_rate || 0,
-      invoice_prefix: initialSettings?.invoice_prefix || "INV-",
+      company_legal_name: initialSettings?.company_legal_name || "Hisako Technologies Limited",
+      trading_name: initialSettings?.trading_name || "Hisako",
+      email: initialSettings?.email || "hello@hisako.eu",
+      website: initialSettings?.website || "hisako.eu",
+      registered_country: initialSettings?.registered_country || "Kenya",
+      currency: initialSettings?.currency || "USD",
+      whatsapp_number: initialSettings?.whatsapp_number || "",
+      calendly_url: initialSettings?.calendly_url || "",
+      deposit_percentage: initialSettings?.deposit_percentage || 50,
+      payment_terms_days: initialSettings?.payment_terms_days || 7,
+      late_payment_interest: initialSettings?.late_payment_interest || 2.0,
+      retainer_notice_days: initialSettings?.retainer_notice_days || 30,
     },
   });
 
-  const watchCompanyName = form.watch("company_name");
+  const watchCompanyName = form.watch("company_legal_name");
 
   async function onSubmit(data: SettingsValues) {
     setIsSaving(true);
@@ -83,14 +91,18 @@ export function SettingsClient({ initialSettings }: any) {
 
   const handleResetDefaults = () => {
     form.reset({
-      company_name: "Hisako Technologies",
-      company_email: "",
-      company_phone: "",
-      company_website: "https://hisako.com",
-      company_address: "",
-      default_currency: "USD",
-      default_tax_rate: 0,
-      invoice_prefix: "INV-",
+      company_legal_name: "Hisako Technologies Limited",
+      trading_name: "Hisako",
+      email: "hello@hisako.eu",
+      website: "hisako.eu",
+      registered_country: "Kenya",
+      currency: "USD",
+      whatsapp_number: "",
+      calendly_url: "",
+      deposit_percentage: 50,
+      payment_terms_days: 7,
+      late_payment_interest: 2.0,
+      retainer_notice_days: 30,
     });
     toast.info("Reset to default values. Don't forget to save.");
   };
@@ -111,21 +123,27 @@ export function SettingsClient({ initialSettings }: any) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="company_name" render={({ field }) => (
-                  <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="company_legal_name" render={({ field }) => (
+                  <FormItem><FormLabel>Legal Company Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="company_website" render={({ field }) => (
-                  <FormItem><FormLabel>Website</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="trading_name" render={({ field }) => (
+                  <FormItem><FormLabel>Trading Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="company_email" render={({ field }) => (
+                <FormField control={form.control} name="website" render={({ field }) => (
+                  <FormItem><FormLabel>Website</FormLabel><FormControl><Input placeholder="hisako.eu" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem><FormLabel>Support Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="company_phone" render={({ field }) => (
-                  <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="whatsapp_number" render={({ field }) => (
+                  <FormItem><FormLabel>WhatsApp Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="calendly_url" render={({ field }) => (
+                  <FormItem><FormLabel>Calendly URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <FormField control={form.control} name="company_address" render={({ field }) => (
-                <FormItem><FormLabel>Business Address</FormLabel><FormControl><Textarea className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormField control={form.control} name="registered_country" render={({ field }) => (
+                <FormItem><FormLabel>Registered Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
             </CardContent>
           </Card>
@@ -135,15 +153,21 @@ export function SettingsClient({ initialSettings }: any) {
               <CardTitle>Document & Billing Defaults</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField control={form.control} name="default_currency" render={({ field }) => (
-                  <FormItem><FormLabel>Default Currency</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <FormField control={form.control} name="currency" render={({ field }) => (
+                  <FormItem><FormLabel>Currency</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="default_tax_rate" render={({ field }) => (
-                  <FormItem><FormLabel>Tax Rate (%)</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="deposit_percentage" render={({ field }) => (
+                  <FormItem><FormLabel>Deposit (%)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="invoice_prefix" render={({ field }) => (
-                  <FormItem><FormLabel>Invoice Prefix</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="payment_terms_days" render={({ field }) => (
+                  <FormItem><FormLabel>Payment Terms (Days)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="late_payment_interest" render={({ field }) => (
+                  <FormItem><FormLabel>Late Interest (%)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="retainer_notice_days" render={({ field }) => (
+                  <FormItem><FormLabel>Retainer Notice (Days)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
               
