@@ -164,7 +164,7 @@ export function ProposalForm({ client, existingData, documentId, docLabel }: any
         <Card><CardHeader><CardTitle>4. Timeline</CardTitle></CardHeader><CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {['kickoff_date', 'map_duration', 'design_duration', 'build_duration', 'total_timeline', 'go_live_date'].map(item => (
             <FormField key={item} control={form.control} name={item as keyof FormValues} render={({ field }) => (
-              <FormItem><FormLabel className="capitalize">{item.replace('_', ' ')}</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+              <FormItem><FormLabel className="capitalize">{item.replace('_', ' ')}</FormLabel><FormControl><Input {...field} value={field.value as string} /></FormControl></FormItem>
             )} />
           ))}
         </CardContent></Card>

@@ -57,15 +57,13 @@ export function TopBar() {
         </button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center outline-none">
+          <DropdownMenuTrigger render={<button className="flex items-center outline-none" />}>
               <Avatar className="h-8 w-8 border border-zinc-200 cursor-pointer dark:border-zinc-800">
                 <AvatarImage src={profile?.avatar_url || ""} />
                 <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-300">
                   {getInitials(profile?.full_name || null)}
                 </AvatarFallback>
               </Avatar>
-            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>

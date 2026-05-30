@@ -12,7 +12,7 @@ export function KeyboardShortcuts() {
       if (
         document.activeElement?.tagName === "INPUT" ||
         document.activeElement?.tagName === "TEXTAREA" ||
-        document.activeElement?.isContentEditable
+        (document.activeElement as HTMLElement)?.isContentEditable
       ) {
         return;
       }
