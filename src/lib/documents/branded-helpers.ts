@@ -25,42 +25,70 @@ const SUBTITLES: Record<string, string> = {
   "MONTHLY PERFORMANCE REPORT": "PIPELINE METRICS & INSIGHTS",
 };
 
-// 1. Clean minimal header (no tables or shading)
+// 1. Clean minimal header (no tables or shading, separate paragraphs for correct line breaking)
 export const h1 = (title: string) => {
   const subtitle = SUBTITLES[title] || "HISAKO AI SYSTEM DOCUMENT";
 
-  return new Paragraph({
-    children: [
-      new TextRun({
-        text: "HISAKO  |  AI AGENCY\n",
-        font: "Courier New",
-        size: 20, // 10pt
-        color: "666666",
-        bold: true,
-      }),
-      new TextRun({
-        text: title.toUpperCase() + "\n",
-        font: "Arial Black",
-        size: 40, // 20pt
-        color: "000000",
-        bold: true,
-      }),
-      new TextRun({
-        text: subtitle.toUpperCase(),
-        font: "Arial",
-        size: 20, // 10pt
-        color: "888888",
+  return new Table({
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "HISAKO  |  AI AGENCY",
+                    font: "Courier New",
+                    size: 20, // 10pt
+                    color: "666666",
+                    bold: true,
+                  }),
+                ],
+                spacing: { before: 120, after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: title.toUpperCase(),
+                    font: "Arial Black",
+                    size: 48, // 24pt
+                    color: "000000",
+                    bold: true,
+                  }),
+                ],
+                spacing: { before: 120, after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: subtitle.toUpperCase(),
+                    font: "Arial",
+                    size: 20, // 10pt
+                    color: "888888",
+                  }),
+                ],
+                spacing: { before: 120, after: 240 },
+              }),
+            ],
+            borders: {
+              top: { style: BorderStyle.NONE },
+              bottom: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // Thicker black border
+              left: { style: BorderStyle.NONE },
+              right: { style: BorderStyle.NONE },
+            },
+            margins: { bottom: 240 },
+          }),
+        ],
       }),
     ],
-    border: {
-      bottom: {
-        color: "000000",
-        space: 12,
-        style: BorderStyle.SINGLE,
-        size: 18, // ~2.25pt
-      },
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.NONE },
+      bottom: { style: BorderStyle.NONE },
+      left: { style: BorderStyle.NONE },
+      right: { style: BorderStyle.NONE },
     },
-    spacing: { before: 240, after: 360 },
   });
 };
 
@@ -77,13 +105,13 @@ export const h2 = (text: string) => new Paragraph({
   ],
   border: {
     bottom: {
-      color: "CCCCCC",
-      space: 8,
+      color: "000000",
+      space: 12,
       style: BorderStyle.SINGLE,
-      size: 8, // 1pt
+      size: 12, // 1.5pt
     },
   },
-  spacing: { before: 360, after: 120 },
+  spacing: { before: 480, after: 240 }, // Generous header spacing
 });
 
 // 3. Section Headings - Level 2
@@ -97,10 +125,10 @@ export const h3 = (text: string) => new Paragraph({
       bold: true,
     }),
   ],
-  spacing: { before: 240, after: 80 },
+  spacing: { before: 360, after: 120 },
 });
 
-// 4. Body Paragraph
+// 4. Body Paragraph (Generous line heights and after-spaces)
 export const p = (text: string, important = false) => new Paragraph({
   children: [
     new TextRun({
@@ -111,10 +139,10 @@ export const p = (text: string, important = false) => new Paragraph({
       bold: important,
     }),
   ],
-  spacing: { after: 120, line: 276, lineRule: HeightRule.AUTO },
+  spacing: { before: 60, after: 180, line: 312, lineRule: HeightRule.AUTO }, // 1.3x line height & spacious bottom margin
 });
 
-// 5. Key-Value Row (Uses standard single-row table with 0 border sides, only thin bottom border)
+// 5. Key-Value Row
 export const kv = (key: string, value: string | undefined | null) => new Table({
   rows: [
     new TableRow({
@@ -140,7 +168,7 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
             left: { style: BorderStyle.NONE },
             right: { style: BorderStyle.NONE },
           },
-          margins: { top: 80, bottom: 80 },
+          margins: { top: 120, bottom: 120 },
         }),
         new TableCell({
           children: [
@@ -163,7 +191,7 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
             left: { style: BorderStyle.NONE },
             right: { style: BorderStyle.NONE },
           },
-          margins: { top: 80, bottom: 80 },
+          margins: { top: 120, bottom: 120 },
         }),
       ],
     }),
@@ -178,7 +206,7 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
 });
 
 export const rule = () => new Paragraph({
-  spacing: { after: 180 },
+  spacing: { after: 240 },
 });
 
 // 6. Minimal bracketed status tag
@@ -192,10 +220,10 @@ export const tag = (text: string) => new Paragraph({
       bold: true,
     }),
   ],
-  spacing: { after: 120 },
+  spacing: { before: 120, after: 180 },
 });
 
-// 7. Clean text band (instead of colored shaded table)
+// 7. Clean text band
 export const darkBand = (text: string) => new Paragraph({
   children: [
     new TextRun({
@@ -206,10 +234,10 @@ export const darkBand = (text: string) => new Paragraph({
       bold: true,
     }),
   ],
-  spacing: { before: 180, after: 120 },
+  spacing: { before: 240, after: 180 },
 });
 
-// 8. Clean callout (Uses left border only, no complex tables that render diagonal borders)
+// 8. Clean callout
 export const callout = (text: string) => new Table({
   rows: [
     new TableRow({
@@ -226,6 +254,7 @@ export const callout = (text: string) => new Table({
                   italics: true,
                 }),
               ],
+              spacing: { before: 60, after: 60 },
             }),
           ],
           borders: {
@@ -234,7 +263,7 @@ export const callout = (text: string) => new Table({
             left: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // 3pt black left border
             right: { style: BorderStyle.NONE },
           },
-          margins: { top: 120, bottom: 120, left: 180, right: 180 },
+          margins: { top: 180, bottom: 180, left: 240, right: 240 },
         }),
       ],
     }),
@@ -279,11 +308,11 @@ export const table = (rows: TableRow[]) => {
                 allCaps,
               }),
             ],
-            spacing: { before: 60, after: 60 },
+            spacing: { before: 80, after: 80 },
           }),
         ],
         shading: { fill, type: ShadingType.CLEAR },
-        margins: { top: 80, bottom: 80, left: 120, right: 120 },
+        margins: { top: 120, bottom: 120, left: 160, right: 160 },
         borders: {
           top: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
           bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
@@ -314,7 +343,7 @@ export const cell = (text: string, bold = false) => new TableCell({
       children: [new TextRun({ text, bold })],
     }),
   ],
-  margins: { top: 80, bottom: 80, left: 80, right: 80 },
+  margins: { top: 120, bottom: 120, left: 120, right: 120 },
 });
 
 // 10. Clean signature block
@@ -323,31 +352,31 @@ export const signatureBlock = (party1: string, party2: string) => {
     children: [
       new Paragraph({
         children: [new TextRun({ text: party, font: "Arial", size: 22, color: "000000", bold: true })],
-        spacing: { after: 120 },
+        spacing: { after: 240 },
       }),
       new Paragraph({
         children: [new TextRun({ text: "SIGNATURE", font: "Courier New", size: 16, color: "666666", allCaps: true })],
-        spacing: { before: 180, after: 60 },
+        spacing: { before: 360, after: 120 },
       }),
       new Paragraph({
         border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
-        spacing: { after: 180 },
+        spacing: { after: 240 },
       }),
       new Paragraph({
         children: [new TextRun({ text: "FULL NAME", font: "Courier New", size: 16, color: "666666", allCaps: true })],
-        spacing: { before: 60, after: 60 },
+        spacing: { before: 120, after: 120 },
       }),
       new Paragraph({
         border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
-        spacing: { after: 180 },
+        spacing: { after: 240 },
       }),
       new Paragraph({
         children: [new TextRun({ text: "DATE", font: "Courier New", size: 16, color: "666666", allCaps: true })],
-        spacing: { before: 60, after: 60 },
+        spacing: { before: 120, after: 120 },
       }),
       new Paragraph({
         border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
-        spacing: { after: 60 },
+        spacing: { after: 120 },
       }),
     ],
     width: { size: 45, type: WidthType.PERCENTAGE },
@@ -382,31 +411,71 @@ export const signatureBlock = (party1: string, party2: string) => {
   });
 };
 
-// 11. Minimal official stamp (no complex tables or bright colors)
+// 11. Minimal official stamp (no newlines in single text runs)
 export const officialStamp = () => {
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  return new Paragraph({
-    children: [
-      new TextRun({
-        text: "ISSUED BY HISAKO AI AGENCY\n",
-        font: "Courier New",
-        size: 18,
-        color: "000000",
-        bold: true,
-      }),
-      new TextRun({
-        text: `hisako.eu  ·  hello@hisako.eu  ·  Nairobi, Kenya\nDocument generated: ${dateStr}`,
-        font: "Arial",
-        size: 16,
-        color: "666666",
+  return new Table({
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "ISSUED BY HISAKO AI AGENCY",
+                    font: "Courier New",
+                    size: 18,
+                    color: "000000",
+                    bold: true,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 120, after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "hisako.eu  ·  hello@hisako.eu  ·  Nairobi, Kenya",
+                    font: "Arial",
+                    size: 16,
+                    color: "666666",
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Document generated: ${dateStr}`,
+                    font: "Arial",
+                    size: 14,
+                    color: "888888",
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 120 },
+              }),
+            ],
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+              bottom: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+              left: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+              right: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+            },
+            margins: { top: 180, bottom: 180, left: 180, right: 180 },
+          }),
+        ],
       }),
     ],
-    alignment: AlignmentType.CENTER,
-    border: {
-      top: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
-      bottom: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.NONE },
+      bottom: { style: BorderStyle.NONE },
+      left: { style: BorderStyle.NONE },
+      right: { style: BorderStyle.NONE },
     },
-    spacing: { before: 360, after: 180 },
   });
 };
 
@@ -520,16 +589,16 @@ export const bullet = (text: string) => new Paragraph({
     }),
   ],
   indent: { left: 400, hanging: 200 },
-  spacing: { after: 80 },
+  spacing: { before: 60, after: 120 },
 });
 
-// Section builder helper (uses 1 inch normal margins)
+// Section builder helper (uses 1.25 inches top/bottom margins, 1 inch left/right margins)
 export const buildSection = (children: any[]) => ({
   properties: {
     page: {
       margin: {
-        top: 1440,   // 1 inch
-        bottom: 1440,// 1 inch
+        top: 1800,   // 1.25 inches
+        bottom: 1800,// 1.25 inches
         left: 1440,  // 1 inch
         right: 1440, // 1 inch
         header: 720,
