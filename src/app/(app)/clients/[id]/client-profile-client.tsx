@@ -71,8 +71,42 @@ export function ClientProfileClient({
   const [activityTitle, setActivityTitle] = useState("");
   const [activityBody, setActivityBody] = useState("");
   const [isSubmittingActivity, setIsSubmittingActivity] = useState(false);
+  
+  // Send Document State
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   const supabase = createClient();
+
+  const handleSendToClient = async (documentId: string, docLabel: string) => {
+    if (!client.contact_email) {
+      toast.error("Client email is required to send documents.");
+      return;
+    }
+    
+    setSendingDocId(documentId);
+    
+    try {
+      const response = await fetch("/api/documents/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId }),
+      });
+      
+      const resData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(resData.error || "Failed to send email");
+      }
+      
+      toast.success(`Successfully sent "${docLabel}" to ${client.contact_email}`);
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "An unexpected error occurred while sending the email.");
+    } finally {
+      setSendingDocId(null);
+    }
+  };
 
   const handleStageChange = async (newStage: string) => {
     if (newStage === client.pipeline_stage) return;
@@ -483,12 +517,34 @@ export function ClientProfileClient({
                         <span>Created {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true })}</span>
                         <span>by {doc.profiles?.full_name || "Unknown"}</span>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {doc.storage_path ? (
-                          <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}`} target="_blank" rel="noreferrer" />}>
-                              <Download className="mr-2 h-4 w-4" />
-                              Download
-                          </Button>
+                          <>
+                            <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}`} target="_blank" rel="noreferrer" />}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1 text-[#E8400C] border-[#E8400C]/20 hover:bg-[#E8400C]/10"
+                              onClick={() => handleSendToClient(doc.id, doc.doc_label)}
+                              disabled={sendingDocId === doc.id || !client.contact_email}
+                              title={!client.contact_email ? "Client must have a contact email to send documents." : undefined}
+                            >
+                              {sendingDocId === doc.id ? (
+                                <>
+                                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                  Sending...
+                                </>
+                              ) : (
+                                <>
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  Send to Client
+                                </>
+                              )}
+                            </Button>
+                          </>
                         ) : (
                           <Button variant="secondary" size="sm" className="flex-1" disabled>
                             Draft
