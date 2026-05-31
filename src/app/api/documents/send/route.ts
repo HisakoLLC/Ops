@@ -84,17 +84,21 @@ export async function POST(req: NextRequest) {
     const replyToEmail = process.env.RESEND_REPLY_TO || "hello@hisako.eu";
     const slug = doc.doc_label.toLowerCase().replace(/[^a-z0-9]/g, "-");
 
+    const { renderToStaticMarkup } = await import("react-dom/server");
+
     // Send email using Resend
     const { data: emailResponse, error: emailError } = await resend.emails.send({
       from: `Hisako AI Agency <${fromEmail}>`,
       to: [client.contact_email],
       replyTo: replyToEmail,
       subject: `Hisako AI Agency - Your Document is Ready: ${doc.doc_label}`,
-      react: DocumentEmail({
-        clientName: client.contact_name || client.company_name,
-        docLabel: doc.doc_label,
-        downloadUrl: signedData.signedUrl,
-      }),
+      html: renderToStaticMarkup(
+        DocumentEmail({
+          clientName: client.contact_name || client.company_name,
+          docLabel: doc.doc_label,
+          downloadUrl: signedData.signedUrl,
+        })
+      ),
       attachments: [
         {
           filename: `${slug}.docx`,
