@@ -94,7 +94,7 @@ export default function SendDocumentButton({
             </div>
             <p className="text-xs text-muted-foreground">
               The document will be attached as a .docx file.
-              Sent from notify@notify.hisako.eu
+              Sent from alerts@notify.hisako.eu
             </p>
           </div>
           <DialogFooter>
