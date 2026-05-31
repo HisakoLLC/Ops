@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, h3, p, kv, buildSection, officialStamp, table, row, cell, bullet, tag } from "./helpers";
+import { h1, h2, h3, p, kv, buildSection, officialStamp, table, row, cell, bullet, tag } from "./branded-helpers";
 
 export function buildPipelineHandover(data: Record<string, any>): Document {
   return new Document({

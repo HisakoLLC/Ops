@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, p, buildSection, officialStamp, signatureBlock } from "./helpers";
+import { h1, h2, p, buildSection, officialStamp, signatureBlock } from "./branded-helpers";
 
 export function buildNDA(data: Record<string, any>): Document {
   return new Document({

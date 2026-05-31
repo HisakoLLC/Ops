@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, p, kv, buildSection, officialStamp, table, row, cell, callout } from "./helpers";
+import { h1, h2, p, kv, buildSection, officialStamp, table, row, cell, callout } from "./branded-helpers";
 
 export function buildMonthlyReport(data: Record<string, any>): Document {
   return new Document({

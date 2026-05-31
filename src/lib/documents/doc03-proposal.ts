@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, h3, p, kv, buildSection, officialStamp, callout, bullet } from "./helpers";
+import { h1, h2, h3, p, kv, buildSection, officialStamp, callout, bullet } from "./branded-helpers";
 
 export function buildProposal(data: Record<string, any>): Document {
   return new Document({
