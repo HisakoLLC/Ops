@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { DocumentEmail } from "@/lib/email-templates/document-email";
+import { PIPELINE_STAGES } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   try {
@@ -86,6 +87,9 @@ export async function POST(req: NextRequest) {
 
     const { renderToStaticMarkup } = await import("react-dom/server");
 
+    const stageObj = PIPELINE_STAGES.find((s) => s.value === client.pipeline_stage);
+    const pipelineStage = stageObj ? stageObj.label : client.pipeline_stage;
+
     // Send email using Resend
     const { data: emailResponse, error: emailError } = await resend.emails.send({
       from: `Hisako AI Agency <${fromEmail}>`,
@@ -97,6 +101,7 @@ export async function POST(req: NextRequest) {
           clientName: client.contact_name || client.company_name,
           docLabel: doc.doc_label,
           downloadUrl: signedData.signedUrl,
+          pipelineStage,
         })
       ),
       attachments: [
