@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
     const result = await resend.emails.send({
       from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to: [to],
+      replyTo: 'hello@hisako.eu',
       subject,
       html,
       attachments,
