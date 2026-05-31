@@ -43,6 +43,10 @@ export const table = (rows: TableRow[]) => new Table({
   width: { size: 100, type: WidthType.PERCENTAGE },
 });
 
+export const row = (cells: TableCell[]) => new TableRow({
+  children: cells,
+});
+
 export const cell = (text: string, bold = false) => new TableCell({
   children: [new Paragraph({ children: [new TextRun({ text, bold })] })],
   margins: { top: 100, bottom: 100, left: 100, right: 100 },

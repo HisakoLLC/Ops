@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, h3, p, kv, rule, table, cell } from "./helpers";
+import { h1, h2, h3, p, kv, rule, table, cell, row } from "./helpers";
 
 export function buildPipelineHandover(data: Record<string, any>): Document {
   return new Document({
@@ -20,13 +20,22 @@ export function buildPipelineHandover(data: Record<string, any>): Document {
           kv("Trigger", data.trigger_description),
           
           h2("2. Workflow Steps"),
-          ...(data.steps || []).map((step: any) => p(`${step.step_number}. ${step.description}`)),
+          ...(data.steps || data.pipeline_steps || []).map((step: any) => p(`${step.step_number || step.step_label || ""}. ${step.description || step.step_description || ""}`)),
           
           h2("3. Systems & Access"),
-          table(
-            (data.tools_table || []).map((t: any) => ({
-              children: [cell(t.tool), cell(t.role), cell(t.account_owner), cell(t.access_type)]
-            }))
+          ...(Array.isArray(data.tools_table) && data.tools_table.length > 0
+            ? [
+                table([
+                  row([cell("Tool", true), cell("Role", true), cell("Account Owner", true), cell("Access Type", true)]),
+                  ...data.tools_table.map((t: any) => row([
+                    cell(t.tool || ""),
+                    cell(t.role || ""),
+                    cell(t.account_owner || ""),
+                    cell(t.access_type || "")
+                  ]))
+                ])
+              ]
+            : [p(data.tools_used || "No tools specified.")]
           ),
           
           h2("4. Monitoring & Maintenance"),
@@ -35,12 +44,15 @@ export function buildPipelineHandover(data: Record<string, any>): Document {
           kv("Error Alert Method", data.error_alert_method),
           
           h3("Common Issues"),
-          ...(data.common_issues || []).map((issue: any) => 
-            p(`• ${issue.symptom} -> Cause: ${issue.cause} -> Fix: ${issue.fix}`)
+          ...(Array.isArray(data.common_issues) && data.common_issues.length > 0
+            ? data.common_issues.map((issue: any) => 
+                p(`• ${issue.symptom || ""} -> Cause: ${issue.cause || ""} -> Fix: ${issue.fix || ""}`)
+              )
+            : [p(typeof data.common_issues === "string" ? data.common_issues : "None specified.")]
           ),
           
           h3("DO NOT CHANGE"),
-          p(data.do_not_change_list || "None specified."),
+          p(data.do_not_change_list || data.do_not_change || "None specified."),
           
           h2("5. Escalation & Support"),
           kv("Escalation Email", data.escalation_email),

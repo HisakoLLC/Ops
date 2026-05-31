@@ -1,5 +1,5 @@
 import { Document } from "docx";
-import { h1, h2, h3, p, kv, rule, table, cell } from "./helpers";
+import { h1, h2, h3, p, kv, rule, table, cell, row } from "./helpers";
 
 export function buildMonthlyReport(data: Record<string, any>): Document {
   return new Document({
@@ -28,20 +28,26 @@ export function buildMonthlyReport(data: Record<string, any>): Document {
           
           h2("4. Incidents & Resolutions"),
           ...(data.incidents?.length ? [
-            table(
-              data.incidents.map((i: any) => ({
-                children: [cell(i.date), cell(i.severity), cell(i.description), cell(i.resolution)]
-              }))
-            )
+            table([
+              row([cell("Date", true), cell("Severity", true), cell("Description", true), cell("Resolution", true)]),
+              ...data.incidents.map((i: any) => row([
+                cell(i.date || ""),
+                cell(i.severity || ""),
+                cell(i.description || ""),
+                cell(i.resolution || "")
+              ]))
+            ])
           ] : [p("No incidents reported during this period.")]),
           
           h2("5. Optimisations Deployed"),
           ...(data.optimisations?.length ? [
-            table(
-              data.optimisations.map((o: any) => ({
-                children: [cell(o.change), cell(o.impact)]
-              }))
-            )
+            table([
+              row([cell("Change", true), cell("Impact", true)]),
+              ...data.optimisations.map((o: any) => row([
+                cell(o.change || ""),
+                cell(o.impact || "")
+              ]))
+            ])
           ] : [p("No structural changes deployed this period.")]),
           
           h2("6. Look Ahead"),
