@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Search, Plus } from "lucide-react";
@@ -39,6 +40,7 @@ type KanbanClient = Client & { lastActivity?: string | null; daysInStage?: numbe
 const ACTIVE_STAGES = PIPELINE_STAGES.filter(s => !['inactive', 'churned'].includes(s.value));
 
 export function PipelineBoardClient({ initialClients }: { initialClients: KanbanClient[] }) {
+  const router = useRouter();
   const [clients, setClients] = useState<KanbanClient[]>(initialClients);
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -113,17 +115,23 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
     if (!over) return;
 
     const activeId = active.id as string;
-    const client = clients.find(c => c.id === activeId);
-    
-    if (!client) return;
-    
-    // We need original client to check if stage changed
     const originalClient = initialClients.find(c => c.id === activeId);
     if (!originalClient) return;
 
-    if (originalClient.pipeline_stage !== client.pipeline_stage) {
+    const isOverColumn = over.data.current?.type === "Column";
+    const isOverClient = over.data.current?.type === "Client";
+
+    let newStage: string | null = null;
+    if (isOverColumn) {
+      newStage = over.id as string;
+    } else if (isOverClient) {
+      newStage = over.data.current?.client?.pipeline_stage || null;
+    }
+
+    if (!newStage) return;
+
+    if (originalClient.pipeline_stage !== newStage) {
       const oldStage = originalClient.pipeline_stage;
-      const newStage = client.pipeline_stage;
 
       const { data: userData } = await supabase.auth.getUser();
 
@@ -135,7 +143,8 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
 
       if (error) {
         toast.error("Failed to update stage");
-        // Revert (in a real app, we'd trigger a refetch or revert state)
+        // Revert local state if DB update fails
+        setClients(clients => clients.map(c => c.id === activeId ? { ...c, pipeline_stage: oldStage } : c));
         return;
       }
 
@@ -152,8 +161,9 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
 
       toast.success("Pipeline stage updated");
       
-      // Update original client in our pseudo-cache so we don't trigger it again on another move
-      originalClient.pipeline_stage = newStage;
+      // Update original client in our pseudo-cache
+      originalClient.pipeline_stage = newStage as any;
+      router.refresh();
     }
   };
 
