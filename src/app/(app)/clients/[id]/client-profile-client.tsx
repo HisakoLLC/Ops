@@ -13,6 +13,7 @@ import {
 import { Client, Activity, Document as DocType } from "@/types";
 import { PIPELINE_STAGES, DOC_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
+import SendDocumentButton from "@/components/SendDocumentButton";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,42 +72,8 @@ export function ClientProfileClient({
   const [activityTitle, setActivityTitle] = useState("");
   const [activityBody, setActivityBody] = useState("");
   const [isSubmittingActivity, setIsSubmittingActivity] = useState(false);
-  
-  // Send Document State
-  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   const supabase = createClient();
-
-  const handleSendToClient = async (documentId: string, docLabel: string) => {
-    if (!client.contact_email) {
-      toast.error("Client email is required to send documents.");
-      return;
-    }
-    
-    setSendingDocId(documentId);
-    
-    try {
-      const response = await fetch("/api/documents/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId }),
-      });
-      
-      const resData = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(resData.error || "Failed to send email");
-      }
-      
-      toast.success(`Successfully sent "${docLabel}" to ${client.contact_email}`);
-      router.refresh();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "An unexpected error occurred while sending the email.");
-    } finally {
-      setSendingDocId(null);
-    }
-  };
 
   const handleStageChange = async (newStage: string) => {
     if (newStage === client.pipeline_stage) return;
@@ -524,26 +491,13 @@ export function ClientProfileClient({
                                 <Download className="mr-2 h-4 w-4" />
                                 Download
                             </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="flex-1 text-[#E8400C] border-[#E8400C]/20 hover:bg-[#E8400C]/10"
-                              onClick={() => handleSendToClient(doc.id, doc.doc_label)}
-                              disabled={sendingDocId === doc.id || !client.contact_email}
-                              title={!client.contact_email ? "Client must have a contact email to send documents." : undefined}
-                            >
-                              {sendingDocId === doc.id ? (
-                                <>
-                                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                  Sending...
-                                </>
-                              ) : (
-                                <>
-                                  <Mail className="mr-2 h-4 w-4" />
-                                  Send to Client
-                                </>
-                              )}
-                            </Button>
+                            <SendDocumentButton
+                              documentId={doc.id}
+                              clientEmail={client.contact_email || ""}
+                              clientName={client.contact_name || client.company_name}
+                              docLabel={doc.doc_label}
+                              docType={doc.doc_type}
+                            />
                           </>
                         ) : (
                           <Button variant="secondary" size="sm" className="flex-1" disabled>
