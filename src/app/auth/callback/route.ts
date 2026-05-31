@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import type { EmailOtpType } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  // if "next" is in param, use it as the redirect URL
+  const token_hash = searchParams.get('token_hash')
+  const type = searchParams.get('type') as EmailOtpType | null
   const next = searchParams.get('next') ?? '/dashboard'
 
-  if (code) {
-    const cookieStore = await cookies()
-    
-    // Create the redirect response first
-    const response = NextResponse.redirect(`${origin}${next}`)
-    
-    // Create Supabase client that writes session cookies directly to the redirect response
-    const supabase = createServerClient(
+  const cookieStore = await cookies()
+
+  const createSupabase = (response: NextResponse) =>
+    createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -33,13 +31,27 @@ export async function GET(request: Request) {
       }
     )
 
+  // ── Flow 1: PKCE code exchange (magic link / OAuth) ──────────────────────
+  if (code) {
+    const response = NextResponse.redirect(`${origin}${next}`)
+    const supabase = createSupabase(response)
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (!error) {
-      return response
-    }
+    if (!error) return response
   }
 
-  // return the user to an error page with instructions
+  // ── Flow 2: token_hash (email invite / password recovery) ─────────────────
+  if (token_hash && type) {
+    // For invites and password resets, redirect to the set-password page
+    const redirectTo = (type === 'invite' || type === 'recovery')
+      ? `${origin}/update-password`
+      : `${origin}${next}`
+
+    const response = NextResponse.redirect(redirectTo)
+    const supabase = createSupabase(response)
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type })
+    if (!error) return response
+  }
+
+  // ── Fallback: something went wrong ────────────────────────────────────────
   return NextResponse.redirect(`${origin}/login?error=Invalid+or+expired+invite+link`)
 }
