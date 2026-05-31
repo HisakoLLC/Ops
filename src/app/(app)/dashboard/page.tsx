@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   const { data: pipelineClients } = await supabase
     .from("clients")
     .select("pipeline_value")
-    .in("pipeline_stage", ["proposal", "signed", "build", "live"]);
+    .not("pipeline_stage", "in", '("churned","inactive")');
   
   const pipelineValue = pipelineClients?.reduce((acc, c) => acc + (Number(c.pipeline_value) || 0), 0) || 0;
 
