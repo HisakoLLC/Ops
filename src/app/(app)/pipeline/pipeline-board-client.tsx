@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
   const [clients, setClients] = useState<KanbanClient[]>(initialClients);
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const pendingStageUpdateRef = useRef<{ clientId: string; stage: string } | null>(null);
   
   const supabase = createClient();
 
@@ -65,6 +66,7 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
+    pendingStageUpdateRef.current = null;
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -86,6 +88,10 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
       const activeIndex = clients.findIndex((c) => c.id === activeId);
       const overIndex = clients.findIndex((c) => c.id === overId);
 
+      if (activeIndex === -1) return clients;
+
+      let resultClients = clients;
+
       if (isOverClient) {
         const activeClient = clients[activeIndex];
         const overClient = clients[overIndex];
@@ -93,42 +99,41 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
         if (activeClient.pipeline_stage !== overClient.pipeline_stage) {
           const newClients = [...clients];
           newClients[activeIndex].pipeline_stage = overClient.pipeline_stage;
-          return arrayMove(newClients, activeIndex, overIndex);
+          resultClients = arrayMove(newClients, activeIndex, overIndex);
+        } else {
+          resultClients = arrayMove(clients, activeIndex, overIndex);
         }
-
-        return arrayMove(clients, activeIndex, overIndex);
-      }
-
-      if (isOverColumn) {
+      } else if (isOverColumn) {
         const newClients = [...clients];
         newClients[activeIndex].pipeline_stage = overId as any;
-        return arrayMove(newClients, activeIndex, newClients.length - 1);
+        resultClients = arrayMove(newClients, activeIndex, newClients.length - 1);
       }
 
-      return clients;
+      const updatedActiveClient = resultClients.find(c => c.id === activeId);
+      if (updatedActiveClient) {
+        pendingStageUpdateRef.current = {
+          clientId: activeId as string,
+          stage: updatedActiveClient.pipeline_stage
+        };
+      }
+
+      return resultClients;
     });
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     setActiveId(null);
-    const { active, over } = event;
-    if (!over) return;
-
+    const { active } = event;
     const activeId = active.id as string;
     const originalClient = initialClients.find(c => c.id === activeId);
     if (!originalClient) return;
 
-    const isOverColumn = over.data.current?.type === "Column";
-    const isOverClient = over.data.current?.type === "Client";
+    const pendingUpdate = pendingStageUpdateRef.current;
+    const newStage = pendingUpdate && pendingUpdate.clientId === activeId
+      ? pendingUpdate.stage
+      : originalClient.pipeline_stage;
 
-    let newStage: string | null = null;
-    if (isOverColumn) {
-      newStage = over.id as string;
-    } else if (isOverClient) {
-      newStage = over.data.current?.client?.pipeline_stage || null;
-    }
-
-    if (!newStage) return;
+    pendingStageUpdateRef.current = null;
 
     if (originalClient.pipeline_stage !== newStage) {
       const oldStage = originalClient.pipeline_stage;
