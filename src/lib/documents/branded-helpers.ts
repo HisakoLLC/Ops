@@ -25,137 +25,65 @@ const SUBTITLES: Record<string, string> = {
   "MONTHLY PERFORMANCE REPORT": "PIPELINE METRICS & INSIGHTS",
 };
 
-// 1. Dark Header Block
+// 1. Clean minimal header (no tables or shading)
 export const h1 = (title: string) => {
   const subtitle = SUBTITLES[title] || "HISAKO AI SYSTEM DOCUMENT";
 
-  return new Table({
-    rows: [
-      // Dark row
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: "HISAKO  |  AI AGENCY",
-                    font: "Courier New",
-                    size: 24, // 16px
-                    color: "FFFFFF",
-                    bold: true,
-                    allCaps: true,
-                  }),
-                ],
-                spacing: { before: 400, after: 600 },
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: title,
-                    font: "Arial Black",
-                    size: 72, // 48px
-                    color: "FFFFFF",
-                    bold: true,
-                  }),
-                ],
-                spacing: { after: 200 },
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: subtitle,
-                    font: "Arial",
-                    size: 33, // 22px
-                    color: "AAAAAA",
-                    italics: true,
-                  }),
-                ],
-                spacing: { after: 600 },
-              }),
-            ],
-            shading: { fill: "111111", type: ShadingType.CLEAR },
-            margins: { top: 600, bottom: 600, left: 600, right: 600 },
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-            },
-          }),
-        ],
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: "HISAKO  |  AI AGENCY\n",
+        font: "Courier New",
+        size: 20, // 10pt
+        color: "666666",
+        bold: true,
       }),
-      // Orange stripe row (60px = 900 dxa)
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [new TextRun({ text: "" })],
-              }),
-            ],
-            shading: { fill: "E8400C", type: ShadingType.CLEAR },
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-            },
-          }),
-        ],
-        height: { value: 900, rule: HeightRule.EXACT },
+      new TextRun({
+        text: title.toUpperCase() + "\n",
+        font: "Arial Black",
+        size: 40, // 20pt
+        color: "000000",
+        bold: true,
       }),
-      // White spacer row (120px = 1800 dxa)
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [new TextRun({ text: "" })],
-              }),
-            ],
-            shading: { fill: "FFFFFF", type: ShadingType.CLEAR },
-            borders: {
-              top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.NONE },
-              left: { style: BorderStyle.NONE },
-              right: { style: BorderStyle.NONE },
-            },
-          }),
-        ],
-        height: { value: 1800, rule: HeightRule.EXACT },
+      new TextRun({
+        text: subtitle.toUpperCase(),
+        font: "Arial",
+        size: 20, // 10pt
+        color: "888888",
       }),
     ],
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    borders: {
-      top: { style: BorderStyle.NONE },
-      bottom: { style: BorderStyle.NONE },
-      left: { style: BorderStyle.NONE },
-      right: { style: BorderStyle.NONE },
+    border: {
+      bottom: {
+        color: "000000",
+        space: 12,
+        style: BorderStyle.SINGLE,
+        size: 18, // ~2.25pt
+      },
     },
+    spacing: { before: 240, after: 360 },
   });
 };
 
-// 3. Section Headings - Level 1
+// 2. Section Headings - Level 1
 export const h2 = (text: string) => new Paragraph({
   children: [
     new TextRun({
       text,
       font: "Arial Black",
-      size: 42, // 28px
-      color: "0A0A0A",
+      size: 28, // 14pt
+      color: "000000",
       bold: true,
     }),
   ],
   border: {
     bottom: {
-      color: "E8400C",
-      space: 12,
+      color: "CCCCCC",
+      space: 8,
       style: BorderStyle.SINGLE,
-      size: 32, // 4px
+      size: 8, // 1pt
     },
   },
-  spacing: { before: 280, after: 120 },
+  spacing: { before: 360, after: 120 },
 });
 
 // 3. Section Headings - Level 2
@@ -164,38 +92,29 @@ export const h3 = (text: string) => new Paragraph({
     new TextRun({
       text,
       font: "Arial",
-      size: 36, // 24px
-      color: "111111",
+      size: 24, // 12pt
+      color: "000000",
       bold: true,
     }),
   ],
-  border: {
-    left: {
-      color: "E8400C",
-      space: 12,
-      style: BorderStyle.SINGLE,
-      size: 96, // 16px (12pt)
-    },
-  },
-  indent: { left: 200 },
-  spacing: { before: 200, after: 100 },
+  spacing: { before: 240, after: 80 },
 });
 
-// 4. Body Text
+// 4. Body Paragraph
 export const p = (text: string, important = false) => new Paragraph({
   children: [
     new TextRun({
       text,
       font: "Arial",
-      size: 33, // 22px
-      color: important ? "0A0A0A" : "444444",
+      size: 22, // 11pt
+      color: important ? "000000" : "333333",
       bold: important,
     }),
   ],
-  spacing: { line: 276, lineRule: HeightRule.AUTO, after: 120 },
+  spacing: { after: 120, line: 276, lineRule: HeightRule.AUTO },
 });
 
-// 2. Metadata Table Helper
+// 5. Key-Value Row (Uses standard single-row table with 0 border sides, only thin bottom border)
 export const kv = (key: string, value: string | undefined | null) => new Table({
   rows: [
     new TableRow({
@@ -205,12 +124,11 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
             new Paragraph({
               children: [
                 new TextRun({
-                  text: key,
+                  text: key.toUpperCase(),
                   font: "Courier New",
-                  size: 26, // 17px
-                  color: "888888",
+                  size: 18, // 9pt
+                  color: "666666",
                   bold: true,
-                  allCaps: true,
                 }),
               ],
             }),
@@ -218,11 +136,11 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
           width: { size: 30, type: WidthType.PERCENTAGE },
           borders: {
             top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "E0E0E0" },
             left: { style: BorderStyle.NONE },
             right: { style: BorderStyle.NONE },
           },
-          margins: { top: 120, bottom: 120 },
+          margins: { top: 80, bottom: 80 },
         }),
         new TableCell({
           children: [
@@ -231,8 +149,8 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
                 new TextRun({
                   text: value ?? "[NOT PROVIDED]",
                   font: "Arial",
-                  size: 33, // 22px
-                  color: "0A0A0A",
+                  size: 22, // 11pt
+                  color: "000000",
                   bold: true,
                 }),
               ],
@@ -241,11 +159,11 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
           width: { size: 70, type: WidthType.PERCENTAGE },
           borders: {
             top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "E0E0E0" },
             left: { style: BorderStyle.NONE },
             right: { style: BorderStyle.NONE },
           },
-          margins: { top: 120, bottom: 120 },
+          margins: { top: 80, bottom: 80 },
         }),
       ],
     }),
@@ -260,119 +178,63 @@ export const kv = (key: string, value: string | undefined | null) => new Table({
 });
 
 export const rule = () => new Paragraph({
-  spacing: { after: 200 },
+  spacing: { after: 180 },
 });
 
-// 5. Orange Tag Labels
-export const tag = (text: string) => new Table({
-  rows: [
-    new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text,
-                  font: "Courier New",
-                  size: 24, // 16px
-                  color: "FFFFFF",
-                  bold: true,
-                  allCaps: true,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-          ],
-          shading: { fill: "E8400C", type: ShadingType.CLEAR },
-          margins: { top: 80, bottom: 80, left: 160, right: 160 },
-          borders: {
-            top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.NONE },
-            left: { style: BorderStyle.NONE },
-            right: { style: BorderStyle.NONE },
-          },
-        }),
-      ],
+// 6. Minimal bracketed status tag
+export const tag = (text: string) => new Paragraph({
+  children: [
+    new TextRun({
+      text: `[ ${text.toUpperCase()} ]`,
+      font: "Courier New",
+      size: 20,
+      color: "333333",
+      bold: true,
     }),
   ],
-  width: { size: 2500, type: WidthType.DXA },
+  spacing: { after: 120 },
 });
 
-// 6. Dark Band
-export const darkBand = (text: string) => new Table({
-  rows: [
-    new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text,
-                  font: "Arial",
-                  size: 33, // 22px
-                  color: "FFFFFF",
-                  bold: true,
-                  allCaps: true,
-                }),
-              ],
-            }),
-          ],
-          shading: { fill: "2A2A2A", type: ShadingType.CLEAR },
-          margins: { top: 120, bottom: 120, left: 200, right: 200 },
-          borders: {
-            top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.NONE },
-            left: { style: BorderStyle.NONE },
-            right: { style: BorderStyle.NONE },
-          },
-        }),
-      ],
+// 7. Clean text band (instead of colored shaded table)
+export const darkBand = (text: string) => new Paragraph({
+  children: [
+    new TextRun({
+      text: `// ${text.toUpperCase()}`,
+      font: "Courier New",
+      size: 22,
+      color: "000000",
+      bold: true,
     }),
   ],
-  width: { size: 100, type: WidthType.PERCENTAGE },
+  spacing: { before: 180, after: 120 },
 });
 
-// 7. Callout Box
+// 8. Clean callout (Uses left border only, no complex tables that render diagonal borders)
 export const callout = (text: string) => new Table({
   rows: [
     new TableRow({
       children: [
         new TableCell({
-          children: [],
-          shading: { fill: "E8400C", type: ShadingType.CLEAR },
-          width: { size: 280, type: WidthType.DXA },
-          borders: {
-            top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.NONE },
-            left: { style: BorderStyle.NONE },
-            right: { style: BorderStyle.NONE },
-          },
-        }),
-        new TableCell({
           children: [
             new Paragraph({
               children: [
                 new TextRun({
                   text,
                   font: "Arial",
-                  size: 33, // 22px
-                  color: "0A0A0A",
+                  size: 22, // 11pt
+                  color: "333333",
                   italics: true,
                 }),
               ],
-              spacing: { before: 100, after: 100 },
             }),
           ],
-          shading: { fill: "FDF1EE", type: ShadingType.CLEAR },
-          margins: { top: 200, bottom: 200, left: 300, right: 300 },
           borders: {
             top: { style: BorderStyle.NONE },
             bottom: { style: BorderStyle.NONE },
-            left: { style: BorderStyle.NONE },
+            left: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // 3pt black left border
             right: { style: BorderStyle.NONE },
           },
+          margins: { top: 120, bottom: 120, left: 180, right: 180 },
         }),
       ],
     }),
@@ -380,22 +242,20 @@ export const callout = (text: string) => new Table({
   width: { size: 100, type: WidthType.PERCENTAGE },
 });
 
-// 8. Table Styling Interceptor
+// 9. Standard clean table
 export const table = (rows: TableRow[]) => {
   const styledRows = rows.map((r, rowIndex) => {
-    // Attempt to access children cells of TableRow options
     const cells = (r as any).options?.children || [];
     
     const styledCells = cells.map((c: any) => {
       const isHeader = rowIndex === 0;
-      const fill = isHeader ? "111111" : (rowIndex % 2 === 0 ? "F7F7F5" : "FFFFFF");
+      const fill = isHeader ? "EFEFEF" : "FFFFFF";
       const font = isHeader ? "Courier New" : "Arial";
-      const size = isHeader ? 24 : 33; // 16px or 22px
-      const color = isHeader ? "FFFFFF" : "0A0A0A";
+      const size = isHeader ? 20 : 22; // 10pt or 11pt
+      const color = "000000";
       const bold = isHeader;
       const allCaps = isHeader;
       
-      // Get text of cell
       let cellText = "";
       try {
         const paras = c.options?.children || [];
@@ -419,16 +279,16 @@ export const table = (rows: TableRow[]) => {
                 allCaps,
               }),
             ],
-            spacing: { before: 80, after: 80 },
+            spacing: { before: 60, after: 60 },
           }),
         ],
         shading: { fill, type: ShadingType.CLEAR },
-        margins: { top: 120, bottom: 120, left: 160, right: 160 },
+        margins: { top: 80, bottom: 80, left: 120, right: 120 },
         borders: {
-          top: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
-          bottom: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
-          left: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
-          right: { style: BorderStyle.SINGLE, size: 8, color: "DDDDDD" },
+          top: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
+          bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
+          left: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
+          right: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
         },
       });
     });
@@ -454,48 +314,40 @@ export const cell = (text: string, bold = false) => new TableCell({
       children: [new TextRun({ text, bold })],
     }),
   ],
-  margins: { top: 100, bottom: 100, left: 100, right: 100 },
+  margins: { top: 80, bottom: 80, left: 80, right: 80 },
 });
 
-// 9. Signature Blocks
+// 10. Clean signature block
 export const signatureBlock = (party1: string, party2: string) => {
   const makeSigColumn = (party: string) => new TableCell({
     children: [
       new Paragraph({
-        children: [new TextRun({ text: party, font: "Arial", size: 33, color: "0A0A0A", bold: true })],
-        spacing: { after: 200 },
+        children: [new TextRun({ text: party, font: "Arial", size: 22, color: "000000", bold: true })],
+        spacing: { after: 120 },
       }),
       new Paragraph({
-        children: [new TextRun({ text: "SIGNATURE", font: "Courier New", size: 20, color: "888888", allCaps: true })],
-        spacing: { before: 200, after: 100 },
+        children: [new TextRun({ text: "SIGNATURE", font: "Courier New", size: 16, color: "666666", allCaps: true })],
+        spacing: { before: 180, after: 60 },
       }),
       new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" } },
-        spacing: { after: 300 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
+        spacing: { after: 180 },
       }),
       new Paragraph({
-        children: [new TextRun({ text: "FULL NAME", font: "Courier New", size: 20, color: "888888", allCaps: true })],
-        spacing: { before: 100, after: 100 },
+        children: [new TextRun({ text: "FULL NAME", font: "Courier New", size: 16, color: "666666", allCaps: true })],
+        spacing: { before: 60, after: 60 },
       }),
       new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" } },
-        spacing: { after: 300 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
+        spacing: { after: 180 },
       }),
       new Paragraph({
-        children: [new TextRun({ text: "TITLE", font: "Courier New", size: 20, color: "888888", allCaps: true })],
-        spacing: { before: 100, after: 100 },
+        children: [new TextRun({ text: "DATE", font: "Courier New", size: 16, color: "666666", allCaps: true })],
+        spacing: { before: 60, after: 60 },
       }),
       new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" } },
-        spacing: { after: 300 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: "DATE", font: "Courier New", size: 20, color: "888888", allCaps: true })],
-        spacing: { before: 100, after: 100 },
-      }),
-      new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "DDDDDD" } },
-        spacing: { after: 100 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" } },
+        spacing: { after: 60 },
       }),
     ],
     width: { size: 45, type: WidthType.PERCENTAGE },
@@ -512,7 +364,6 @@ export const signatureBlock = (party1: string, party2: string) => {
       new TableRow({
         children: [
           makeSigColumn(party1),
-          // Spacer column
           new TableCell({
             children: [],
             width: { size: 10, type: WidthType.PERCENTAGE },
@@ -531,70 +382,35 @@ export const signatureBlock = (party1: string, party2: string) => {
   });
 };
 
-// 10. Official Stamp
+// 11. Minimal official stamp (no complex tables or bright colors)
 export const officialStamp = () => {
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  return new Table({
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: "ISSUED BY HISAKO AI AGENCY",
-                    font: "Courier New",
-                    size: 24, // 16px
-                    color: "E8400C",
-                    bold: true,
-                    allCaps: true,
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 150, after: 100 },
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: "hisako.eu  ·  hello@hisako.eu  ·  Nairobi, Kenya",
-                    font: "Arial",
-                    size: 20, // 13px
-                    color: "888888",
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 100 },
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `Document generated: ${dateStr}`,
-                    font: "Arial",
-                    size: 16, // 10px
-                    color: "888888",
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 150 },
-              }),
-            ],
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 48, color: "E8400C" }, // ~6pt (8px)
-              bottom: { style: BorderStyle.SINGLE, size: 48, color: "E8400C" },
-              left: { style: BorderStyle.SINGLE, size: 48, color: "E8400C" },
-              right: { style: BorderStyle.SINGLE, size: 48, color: "E8400C" },
-            },
-            margins: { top: 200, bottom: 200, left: 200, right: 200 },
-          }),
-        ],
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: "ISSUED BY HISAKO AI AGENCY\n",
+        font: "Courier New",
+        size: 18,
+        color: "000000",
+        bold: true,
+      }),
+      new TextRun({
+        text: `hisako.eu  ·  hello@hisako.eu  ·  Nairobi, Kenya\nDocument generated: ${dateStr}`,
+        font: "Arial",
+        size: 16,
+        color: "666666",
       }),
     ],
-    width: { size: 100, type: WidthType.PERCENTAGE },
+    alignment: AlignmentType.CENTER,
+    border: {
+      top: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+      bottom: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
+    },
+    spacing: { before: 360, after: 180 },
   });
 };
 
-// 11. Page Footer Builder
+// 12. Minimal page footer
 export const buildFooter = () => new Footer({
   children: [
     new Table({
@@ -608,18 +424,17 @@ export const buildFooter = () => new Footer({
                     new TextRun({
                       text: "HISAKO TEAM  ·  hisako.eu  ·  hello@hisako.eu",
                       font: "Courier New",
-                      size: 21, // 14px
-                      color: "0A0A0A",
+                      size: 16, // 8pt
+                      color: "333333",
                     }),
                   ],
-                  spacing: { before: 100 },
                 }),
                 new Paragraph({
                   children: [
                     new TextRun({
                       text: "CONFIDENTIAL — FOR NAMED RECIPIENT ONLY",
                       font: "Courier New",
-                      size: 20, // 13px
+                      size: 14, // 7pt
                       color: "888888",
                     }),
                   ],
@@ -640,30 +455,29 @@ export const buildFooter = () => new Footer({
                     new TextRun({
                       text: "Page ",
                       font: "Courier New",
-                      size: 21,
+                      size: 16,
                       color: "888888",
                     }),
                     new TextRun({
                       children: [PageNumber.CURRENT],
                       font: "Courier New",
-                      size: 21,
+                      size: 16,
                       color: "888888",
                     }),
                     new TextRun({
                       text: " / ",
                       font: "Courier New",
-                      size: 21,
+                      size: 16,
                       color: "888888",
                     }),
                     new TextRun({
                       children: [PageNumber.TOTAL_PAGES],
                       font: "Courier New",
-                      size: 21,
+                      size: 16,
                       color: "888888",
                     }),
                   ],
                   alignment: AlignmentType.RIGHT,
-                  spacing: { before: 100 },
                 }),
               ],
               width: { size: 30, type: WidthType.PERCENTAGE },
@@ -679,7 +493,7 @@ export const buildFooter = () => new Footer({
       ],
       width: { size: 100, type: WidthType.PERCENTAGE },
       borders: {
-        top: { style: BorderStyle.SINGLE, size: 32, color: "E8400C" }, // 4px top border
+        top: { style: BorderStyle.SINGLE, size: 8, color: "CCCCCC" },
         bottom: { style: BorderStyle.NONE },
         left: { style: BorderStyle.NONE },
         right: { style: BorderStyle.NONE },
@@ -688,37 +502,37 @@ export const buildFooter = () => new Footer({
   ],
 });
 
-// 12. Bullet Points
+// 13. Bullet points
 export const bullet = (text: string) => new Paragraph({
   children: [
     new TextRun({
-      text: "›  ",
+      text: "•  ",
       font: "Arial",
-      size: 33, // 22px
-      color: "E8400C",
+      size: 22,
+      color: "000000",
       bold: true,
     }),
     new TextRun({
       text,
       font: "Arial",
-      size: 33, // 22px
-      color: "444444",
+      size: 22,
+      color: "333333",
     }),
   ],
-  indent: { left: 560, hanging: 280 },
-  spacing: { after: 120 },
+  indent: { left: 400, hanging: 200 },
+  spacing: { after: 80 },
 });
 
-// Section builder helper
+// Section builder helper (uses 1 inch normal margins)
 export const buildSection = (children: any[]) => ({
   properties: {
     page: {
       margin: {
-        top: 0,
-        bottom: 1440,
-        left: 1440,
-        right: 1440,
-        header: 0,
+        top: 1440,   // 1 inch
+        bottom: 1440,// 1 inch
+        left: 1440,  // 1 inch
+        right: 1440, // 1 inch
+        header: 720,
         footer: 720,
       },
     },
