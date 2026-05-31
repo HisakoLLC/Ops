@@ -17,10 +17,13 @@ export function buildProposal(data: Record<string, any>): Document {
           p(data.pipeline_description || "[DESCRIPTION NOT PROVIDED]"),
           
           h2("2. Proposed Architecture"),
-          ...(data.architecture_steps || []).map((step: any) => p(`${step.number}. ${step.description}`)),
+          ...(data.architecture_steps || []).map((step: any) => p(`${step.step_number || step.number || ""}. ${step.description}`)),
           
           h3("Tools to be used:"),
-          ...(data.tools_used || []).map((tool: string) => p(`• ${tool}`)),
+          ...(typeof data.tools_used === "string"
+            ? data.tools_used.split(",").map(t => t.trim()).filter(Boolean)
+            : (data.tools_used || [])
+          ).map((tool: string) => p(`• ${tool}`)),
           
           h2("3. Commercials"),
           kv("Build Fee", `$${data.build_fee ?? 0}`),
