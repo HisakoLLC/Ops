@@ -97,15 +97,21 @@ export function PipelineBoardClient({ initialClients }: { initialClients: Kanban
         const overClient = clients[overIndex];
 
         if (activeClient.pipeline_stage !== overClient.pipeline_stage) {
-          const newClients = [...clients];
-          newClients[activeIndex].pipeline_stage = overClient.pipeline_stage;
+          const newClients = clients.map((c, idx) => 
+            idx === activeIndex 
+              ? { ...c, pipeline_stage: overClient.pipeline_stage } 
+              : c
+          );
           resultClients = arrayMove(newClients, activeIndex, overIndex);
         } else {
           resultClients = arrayMove(clients, activeIndex, overIndex);
         }
       } else if (isOverColumn) {
-        const newClients = [...clients];
-        newClients[activeIndex].pipeline_stage = overId as any;
+        const newClients = clients.map((c, idx) => 
+          idx === activeIndex 
+            ? { ...c, pipeline_stage: overId as any } 
+            : c
+        );
         resultClients = arrayMove(newClients, activeIndex, newClients.length - 1);
       }
 
