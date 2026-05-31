@@ -1,127 +1,117 @@
-import { NextResponse } from "next/dist/server/web/spec-extension/response";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { Packer } from "docx";
 import { buildDocument } from "@/lib/documents";
+import { Packer } from "docx";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { clientId, docType, formData, docLabel, documentId } = await req.json();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!clientId || !docType) {
+    const { clientId, docType, formData, docLabel, documentId } = await req.json();
+    if (!clientId || !docType || !formData || !docLabel) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Initialize server client to read cookies and get the user
-    const serverSupabase = await createClient();
-    const { data: { user }, error: userError } = await serverSupabase.auth.getUser();
+    // Normalize docType to use underscores for database and builder consistency
+    const normalizedDocType = docType.replace(/-/g, "_");
 
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Fetch client + settings
+    const [{ data: client }, { data: settings }] = await Promise.all([
+      supabase.from("clients").select("*").eq("id", clientId).single(),
+      supabase.from("settings").select("*").eq("id", 1).single(),
+    ]);
+    if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    // Merge all data — settings < client < formData (formData wins)
+    const mergedData = {
+      ...(settings || {}),
+      ...client,
+      ...formData,
+      clientRef: client.ref,
+      clientCompany: client.company_name,
+      clientContact: client.contact_name,
+      clientEmail: client.contact_email,
+    };
+
+    // Generate document
+    let buffer: Buffer;
+    try {
+      const doc = buildDocument(normalizedDocType, mergedData);
+      buffer = await Packer.toBuffer(doc);
+    } catch (e: any) {
+      console.error("Document generation error:", e);
+      return NextResponse.json({ error: "Generation failed", detail: e.message }, { status: 500 });
     }
 
-    // We must use service role to bypass RLS for server-side generation if needed
-    // Let's use service role for storage reliability as requested by prompt.
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createSupabaseClient<any>(supabaseUrl, supabaseKey);
+    // Upload to Supabase Storage
+    const timestamp = Date.now();
+    const slug = docLabel.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    const storagePath = `documents/${clientId}/${normalizedDocType}/${timestamp}_${slug}.docx`;
 
-    // Fetch client
-    const { data: client, error: clientError } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("id", clientId)
-      .single();
+    // Use service role for storage (bypasses RLS)
+    const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-    if (clientError || !client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
-    // Fetch settings (assume id = 1 or grab first)
-    const { data: settings } = await supabase
-      .from("settings")
-      .select("*")
-      .limit(1)
-      .single();
-
-    // Merge data
-    const mergedData = { ...settings, ...client, ...formData };
-
-    // Build document
-    const doc = buildDocument(docType, mergedData);
-    
-    // Generate Buffer
-    const buffer = await Packer.toBuffer(doc);
-
-    // Upload to Storage
-    const safeLabel = (docLabel || docType).toLowerCase().replace(/[^a-z0-9]/g, "-");
-    const fileName = `${Date.now()}_${safeLabel}.docx`;
-    const filePath = `${clientId}/${docType}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await serviceClient.storage
       .from("hisako-documents")
-      .upload(filePath, buffer, {
+      .upload(storagePath, buffer, {
         contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         upsert: true,
       });
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
-      return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
+      return NextResponse.json({ error: "Storage failed" }, { status: 500 });
     }
 
-    // Upsert document record
-    const documentData = {
+    // Save/update document record
+    const docRecord = {
       client_id: clientId,
-      doc_type: docType,
-      doc_label: docLabel || docType,
-      storage_path: filePath,
-      form_data: formData,
       created_by: user.id,
-      version: 1, // simplified versioning
+      doc_type: normalizedDocType,
+      doc_label: docLabel,
+      form_data: formData,
+      storage_path: storagePath,
+      version: 1,
     };
 
-    let upsertedDocId = documentId;
-
+    let savedDoc;
     if (documentId) {
-      // If updating
-      const { data: existing } = await supabase.from("documents").select("version").eq("id", documentId).single();
-      documentData.version = (existing?.version || 0) + 1;
-      
-      const { error: updateError } = await supabase
+      // Regenerating existing doc — increment version
+      const { data: existing } = await supabase
+        .from("documents").select("version").eq("id", documentId).single();
+      const { data } = await supabase
         .from("documents")
-        .update(documentData)
-        .eq("id", documentId);
-        
-      if (updateError) throw updateError;
+        .update({ ...docRecord, version: (existing?.version || 1) + 1, updated_at: new Date().toISOString() })
+        .eq("id", documentId).select().single();
+      savedDoc = data;
     } else {
-      // If inserting
-      const { data: inserted, error: insertError } = await supabase
-        .from("documents")
-        .insert([documentData])
-        .select("id")
-        .single();
-        
-      if (insertError) throw insertError;
-      upsertedDocId = inserted.id;
+      const { data } = await supabase
+        .from("documents").insert(docRecord).select().single();
+      savedDoc = data;
     }
 
-    // Insert activity record
-    await supabase.from("activities").insert([{
+    // Log activity on client
+    await supabase.from("activities").insert({
       client_id: clientId,
       created_by: user.id,
       type: "document_generated",
-      title: `Generated ${docLabel || docType}`,
-      metadata: { document_id: upsertedDocId, doc_type: docType }
-    }]);
-
-    return NextResponse.json({ 
-      success: true, 
-      documentId: upsertedDocId 
+      title: `Document generated: ${docLabel}`,
+      metadata: { doc_type: normalizedDocType, document_id: savedDoc?.id },
     });
 
-  } catch (error: any) {
-    console.error("Generation API error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      documentId: savedDoc?.id,
+      storagePath,
+    });
+  } catch (err: any) {
+    console.error("Failed POST route generate doc:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

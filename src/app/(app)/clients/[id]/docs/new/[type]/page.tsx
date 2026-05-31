@@ -29,7 +29,10 @@ export default async function NewDocumentPage({
   const { id: clientId, type: docType } = resolvedParams;
   const docId = resolvedSearchParams.docId;
 
-  const docConfig = DOC_TYPES.find((d) => d.key === docType);
+  // Normalize docType parameter (support both dashes and underscores from URL)
+  const normalizedDocType = docType.replace(/-/g, "_");
+
+  const docConfig = DOC_TYPES.find((d) => d.key === normalizedDocType);
   if (!docConfig) notFound();
 
   const supabase = await createClient();
@@ -62,22 +65,22 @@ export default async function NewDocumentPage({
   }
 
   const renderForm = () => {
-    switch (docType) {
-      case "discovery-script":
+    switch (normalizedDocType) {
+      case "discovery_script":
         return <DiscoveryScriptForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
-      case "intake-questionnaire":
+      case "intake_questionnaire":
         return <IntakeQuestionnaireForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
       case "proposal":
         return <ProposalForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
-      case "services-agreement":
+      case "services_agreement":
         return <ServicesAgreementForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
       case "nda":
         return <NDAForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
-      case "onboarding-checklist":
+      case "onboarding_checklist":
         return <OnboardingChecklistForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
-      case "pipeline-handover":
+      case "pipeline_handover":
         return <PipelineHandoverForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
-      case "monthly-report":
+      case "monthly_report":
         return <MonthlyReportForm client={client} settings={settings || {}} existingData={existingData} documentId={docId} docLabel={docConfig.label} />;
       default:
         return (

@@ -9,16 +9,17 @@ import { buildPipelineHandover } from "./doc07-pipeline-handover";
 import { buildMonthlyReport } from "./doc08-monthly-report";
 
 export function buildDocument(docType: string, data: Record<string, any>): Document {
-  switch (docType) {
-    case "discovery-script": return buildDiscoveryScript(data);
-    case "intake-questionnaire": return buildIntakeQuestionnaire(data);
+  const normalized = docType.replace(/-/g, "_");
+  switch (normalized) {
+    case "discovery_script": return buildDiscoveryScript(data);
+    case "intake_questionnaire": return buildIntakeQuestionnaire(data);
     case "proposal": return buildProposal(data);
-    case "services-agreement": return buildAgreement(data);
+    case "services_agreement": return buildAgreement(data);
     case "nda": return buildNDA(data);
-    case "onboarding-checklist": return buildOnboardingChecklist(data);
-    case "pipeline-handover": return buildPipelineHandover(data);
-    case "monthly-report": return buildMonthlyReport(data);
+    case "onboarding_checklist": return buildOnboardingChecklist(data);
+    case "pipeline_handover": return buildPipelineHandover(data);
+    case "monthly_report": return buildMonthlyReport(data);
     default:
-      return buildNDA(data);
+      throw new Error(`Unknown doc type: ${docType}`);
   }
 }

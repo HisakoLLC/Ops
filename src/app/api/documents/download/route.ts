@@ -1,47 +1,36 @@
-import { NextResponse } from "next/dist/server/web/spec-extension/response";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing document ID" }, { status: 400 });
-    }
-
     const supabase = await createClient();
-
-    // Verify session
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Get document path
-    const { data: document, error } = await supabase
-      .from("documents")
-      .select("storage_path")
-      .eq("id", id)
-      .single();
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-    if (error || !document || !document.storage_path) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
-    }
+    const { data: doc } = await supabase
+      .from("documents").select("*").eq("id", id).single();
+    if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Generate signed URL (60 seconds)
-    const { data, error: signedUrlError } = await supabase.storage
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: signedUrl } = await serviceClient.storage
       .from("hisako-documents")
-      .createSignedUrl(document.storage_path, 60);
+      .createSignedUrl(doc.storage_path, 60);
 
-    if (signedUrlError || !data?.signedUrl) {
-      return NextResponse.json({ error: "Failed to generate download URL" }, { status: 500 });
+    if (!signedUrl?.signedUrl) {
+      return NextResponse.json({ error: "Could not generate download link" }, { status: 500 });
     }
 
-    // Redirect to the signed URL
-    return NextResponse.redirect(data.signedUrl);
-
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.redirect(signedUrl.signedUrl);
+  } catch (err: any) {
+    console.error("Download route error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
