@@ -23,24 +23,12 @@ export function buildInvoice(data: Record<string, any>): Document {
           },
         },
         children: [
-          // Huge Header: HISAKO AI STUDIOS (Tight spacing)
+          // Huge Header: HISAKO with Registered Trademark
           new Paragraph({
             alignment: AlignmentType.LEFT,
             children: [
               new TextRun({
-                text: "HISAKO AI",
-                font: "Arial Black",
-                size: 140, // 70pt
-                color: "000000",
-              }),
-            ],
-            spacing: { after: 0, before: 0, line: 240 },
-          }),
-          new Paragraph({
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({
-                text: "STUDIOS",
+                text: "HISAKO",
                 font: "Arial Black",
                 size: 140, // 70pt
                 color: "000000",
@@ -294,12 +282,14 @@ export function buildInvoice(data: Record<string, any>): Document {
                         margins: { top: 0, bottom: 0, left: 200, right: 200 },
                         borders: { left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
                       }),
-                      // Payments Methods
+                      // Payment Methods
                       new TableCell({
                         width: { size: 30, type: WidthType.PERCENTAGE },
                         children: [
-                          new Paragraph({ children: [new TextRun({ text: "PAYMENTS METHODS", font: "Arial Black", size: 12 })], spacing: { after: 50, before: 150 } }),
-                          new Paragraph({ children: [new TextRun({ text: "Hisako LTD\\nBANK ACCOUNT NUMBER: 2020286430841\\nSWIFT NUMBER: EQBLKENAXXX", font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
+                          new Paragraph({ children: [new TextRun({ text: "PAYMENT METHODS", font: "Arial Black", size: 12 })], spacing: { after: 50, before: 150 } }),
+                          new Paragraph({ children: [new TextRun({ text: "Hisako LTD", font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
+                          new Paragraph({ children: [new TextRun({ text: "BANK ACCOUNT NUMBER: 2020286430841", font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
+                          new Paragraph({ children: [new TextRun({ text: "SWIFT NUMBER: EQBLKENAXXX", font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
                         ],
                         margins: { top: 0, bottom: 0, left: 100, right: 0 },
                         borders: { left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
