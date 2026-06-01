@@ -10,7 +10,7 @@ import {
   Calendar, ArrowRight, DollarSign, Download, RefreshCw, CheckCircle2, ChevronDown 
 } from "lucide-react";
 
-import { Client, Activity, Document as DocType } from "@/types";
+import { Client, Activity, Document as DocType, Invoice } from "@/types";
 import { PIPELINE_STAGES, DOC_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import SendDocumentButton from "@/components/SendDocumentButton";
@@ -52,10 +52,12 @@ export function ClientProfileClient({
   initialClient,
   initialActivities,
   initialDocuments,
+  initialInvoices,
 }: {
   initialClient: Client;
   initialActivities: ExtendedActivity[];
   initialDocuments: ExtendedDoc[];
+  initialInvoices: Invoice[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -279,8 +281,9 @@ export function ClientProfileClient({
 
       {/* TASK 2: Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="finance">Finance</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
@@ -434,6 +437,60 @@ export function ClientProfileClient({
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </TabsContent>
+
+        {/* TAB FINANCE */}
+        <TabsContent value="finance" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm text-zinc-500 font-medium">Total Billed</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold">{formatUSD(initialInvoices.reduce((sum, inv) => sum + inv.amount, 0))}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm text-zinc-500 font-medium">Total Received</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500">{formatUSD(initialInvoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0))}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm text-zinc-500 font-medium">Outstanding</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold text-[#E8400C]">{formatUSD(initialInvoices.filter(i => ['sent', 'overdue'].includes(i.status)).reduce((sum, inv) => sum + inv.amount, 0))}</div></CardContent>
+            </Card>
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Invoices</h2>
+            <Button onClick={() => router.push('/finance')} className="bg-[#E8400C] hover:bg-[#E8400C]/90 text-white">
+              <Plus className="mr-2 h-4 w-4" /> New Invoice
+            </Button>
+          </div>
+          <div className="rounded-md border bg-white dark:bg-zinc-950 dark:border-zinc-800 overflow-hidden">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Ref</th>
+                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">Due Date</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {initialInvoices.length === 0 ? (
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-zinc-500">No invoices generated yet.</td></tr>
+                ) : (
+                  initialInvoices.map(inv => (
+                    <tr key={inv.id}>
+                      <td className="px-4 py-3 font-medium">{inv.invoice_ref || 'Draft'}</td>
+                      <td className="px-4 py-3">{formatUSD(inv.amount)}</td>
+                      <td className="px-4 py-3">{inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : '-'}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : inv.status === 'overdue' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-zinc-100 text-zinc-600'}>
+                          {inv.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </TabsContent>
 

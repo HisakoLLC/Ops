@@ -7,6 +7,7 @@ import { buildAgreement } from "./doc04-services-agreement";
 import { buildOnboardingChecklist } from "./doc06-onboarding-checklist";
 import { buildPipelineHandover } from "./doc07-pipeline-handover";
 import { buildMonthlyReport } from "./doc08-monthly-report";
+import { buildInvoice } from "./doc09-invoice";
 
 export function buildDocument(docType: string, data: Record<string, any>): Document {
   const normalized = docType.replace(/-/g, "_");
@@ -19,6 +20,7 @@ export function buildDocument(docType: string, data: Record<string, any>): Docum
     case "onboarding_checklist": return buildOnboardingChecklist(data);
     case "pipeline_handover": return buildPipelineHandover(data);
     case "monthly_report": return buildMonthlyReport(data);
+    case "invoice": return buildInvoice(data);
     default:
       throw new Error(`Unknown doc type: ${docType}`);
   }

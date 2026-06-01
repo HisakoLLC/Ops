@@ -44,11 +44,19 @@ export default async function ClientProfilePage({
     .eq("client_id", id)
     .order("created_at", { ascending: false });
 
+  // Fetch invoices
+  const { data: invoices } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("client_id", id)
+    .order("created_at", { ascending: false });
+
   return (
     <ClientProfileClient 
       initialClient={client} 
       initialActivities={activities || []} 
       initialDocuments={documents || []} 
+      initialInvoices={invoices || []}
     />
   );
 }

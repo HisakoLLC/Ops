@@ -18,6 +18,7 @@ const ROUTE_MAP: Record<string, string> = {
   "/leads": "Leads",
   "/clients": "Clients",
   "/pipeline": "Pipeline",
+  "/finance": "Finance",
   "/team": "Team",
   "/settings": "Settings",
 };

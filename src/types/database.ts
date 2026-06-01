@@ -97,3 +97,37 @@ export interface Lead {
   created_at: string;
   updated_at: string;
 }
+
+export interface Invoice {
+  id: string;
+  client_id: string | null;
+  invoice_ref: string | null;
+  type: 'deposit' | 'final' | 'retainer' | 'adhoc';
+  amount: number;
+  currency: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  issued_date: string | null;
+  due_date: string | null;
+  paid_date: string | null;
+  description: string | null;
+  line_items: Array<{ description: string; amount: number }>;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Expense {
+  id: string;
+  category: 'tools' | 'contractor' | 'marketing' | 'ops' | 'other';
+  vendor: string | null;
+  vendor_id: string | null;
+  description: string;
+  amount: number;
+  currency: string;
+  date: string;
+  recurring: boolean;
+  recurrence: 'monthly' | 'annual' | 'one-off' | null;
+  receipt_url: string | null;
+  logged_by: string | null;
+  created_at: string;
+}
