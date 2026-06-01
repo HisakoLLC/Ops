@@ -131,7 +131,7 @@ export function KBSidebar({ categories: initialCategories, isAdmin }: { categori
             </div>
             <div className="grid gap-2">
               <Label>Icon</Label>
-              <Select value={newCat.icon} onValueChange={v => setNewCat({...newCat, icon: v})}>
+              <Select value={newCat.icon} onValueChange={v => setNewCat({...newCat, icon: v ?? ''})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.keys(ICONS).map(k => {
