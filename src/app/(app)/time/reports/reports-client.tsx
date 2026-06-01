@@ -80,9 +80,11 @@ export function ReportsClient({ entries }: { entries: any[] }) {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/time"><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
+          <Link href="/time">
+            <Button variant="outline" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight">Time & Profitability Reports</h1>
         </div>
         <div className="flex items-center gap-4">
