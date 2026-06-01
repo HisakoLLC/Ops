@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AuthProvider } from "@/lib/auth-context";
 import { AppSidebar } from "@/components/app-sidebar";
+import { CommandPalette } from "@/components/command-palette";
 import { TopBar } from "@/components/top-bar";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Profile } from "@/types";
@@ -37,6 +38,7 @@ export default async function AppLayout({
   return (
     <AuthProvider user={user} profile={profile as Profile}>
       <KeyboardShortcuts />
+      <CommandPalette />
       <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <AppSidebar />
         <div className="flex flex-1 flex-col overflow-hidden">

@@ -214,3 +214,25 @@ export interface TimeEntry {
   created_at: string;
   updated_at: string;
 }
+
+export interface KBCategory {
+  id: string;
+  name: string;
+  icon: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface KBArticle {
+  id: string;
+  category_id: string | null;
+  title: string;
+  slug: string;
+  content: string;
+  tags: string[];
+  pinned: boolean;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+}

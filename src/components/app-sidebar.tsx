@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock } from "lucide-react";
+import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock, BookOpen } from "lucide-react";
 import { useUser } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/finance", label: "Finance", icon: DollarSign, adminOnly: true },
   { href: "/vendors", label: "Vendors", icon: Database, adminOnly: false },
   { href: "/team", label: "Team", icon: Users2, adminOnly: true },
+  { href: "/kb", label: "Knowledge Base", icon: BookOpen, adminOnly: false },
   { href: "/settings", label: "Settings", icon: Settings, adminOnly: false },
 ];
 
