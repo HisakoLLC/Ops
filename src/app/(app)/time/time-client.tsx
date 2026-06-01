@@ -111,7 +111,7 @@ export function TimeClient({
         <CardContent className="p-4 flex flex-wrap gap-4 items-end">
           <div className="grid gap-1.5 flex-1 min-w-[200px]">
             <Label className="text-xs text-zinc-500 uppercase tracking-wider">Client</Label>
-            <Select value={form.client_id} onValueChange={v => setForm({...form, client_id: v, project_id: '', task_id: ''})}>
+            <Select value={form.client_id} onValueChange={v => setForm({...form, client_id: v ?? '', project_id: '', task_id: ''})}>
               <SelectTrigger><SelectValue placeholder="Select Client" /></SelectTrigger>
               <SelectContent>
                 {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
@@ -121,7 +121,7 @@ export function TimeClient({
           
           <div className="grid gap-1.5 flex-1 min-w-[150px]">
             <Label className="text-xs text-zinc-500 uppercase tracking-wider">Project</Label>
-            <Select value={form.project_id || 'none'} onValueChange={v => setForm({...form, project_id: v === 'none' ? '' : v, task_id: ''})} disabled={!form.client_id}>
+            <Select value={form.project_id || 'none'} onValueChange={v => setForm({...form, project_id: (v === 'none' || !v) ? '' : v, task_id: ''})} disabled={!form.client_id}>
               <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No Project</SelectItem>
@@ -177,7 +177,7 @@ export function TimeClient({
       </div>
 
       <div className="flex justify-end">
-        <Select value={clientFilter} onValueChange={setClientFilter}>
+        <Select value={clientFilter} onValueChange={v => setClientFilter(v ?? 'all')}>
           <SelectTrigger className="w-[200px]"><SelectValue placeholder="Filter by Client" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Clients</SelectItem>
