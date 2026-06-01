@@ -1,4 +1,4 @@
-import { Document, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType, ShadingType, Header, Footer, PageBreak } from "docx";
+import { Document, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType, Footer } from "docx";
 import { format } from "date-fns";
 
 export function buildInvoice(data: Record<string, any>): Document {
@@ -12,7 +12,7 @@ export function buildInvoice(data: Record<string, any>): Document {
   const clientName = data.client_name || "[Client Name]";
   const invoiceDate = data.issued_date ? format(new Date(data.issued_date), "MM/dd/yyyy") : format(new Date(), "MM/dd/yyyy");
   
-  const paymentTermsDays = settings.payment_terms_days || 7;
+  const termsText = "Payment due in 7 days. Late payments may incur charges. Work is delivered as per scope outlined. Ownership transfers upon full payment. AI-generated outputs require client review. Payments are non-refundable once work begins. Liability is limited to fees paid. Payment constitutes acceptance of these terms.";
 
   return new Document({
     sections: [
@@ -23,26 +23,26 @@ export function buildInvoice(data: Record<string, any>): Document {
           },
         },
         children: [
-          // Huge Header: HISAKO AI STUDIOS
+          // Huge Header: HISAKO AI STUDIOS (Tight spacing)
           new Paragraph({
-            alignment: AlignmentType.RIGHT,
+            alignment: AlignmentType.LEFT,
             children: [
               new TextRun({
                 text: "HISAKO AI",
                 font: "Arial Black",
-                size: 100, // 50pt
+                size: 140, // 70pt
                 color: "000000",
               }),
             ],
-            spacing: { after: 0, line: 600 },
+            spacing: { after: 0, before: 0, line: 240 },
           }),
           new Paragraph({
-            alignment: AlignmentType.RIGHT,
+            alignment: AlignmentType.LEFT,
             children: [
               new TextRun({
                 text: "STUDIOS",
                 font: "Arial Black",
-                size: 100, // 50pt
+                size: 140, // 70pt
                 color: "000000",
               }),
               new TextRun({
@@ -53,15 +53,15 @@ export function buildInvoice(data: Record<string, any>): Document {
                 color: "000000",
               }),
             ],
-            spacing: { after: 400, line: 600 },
+            spacing: { after: 400, before: 0, line: 240 },
           }),
 
-          // Invoice Number Line
+          // Invoice Number Line (Only spans 40% of the page)
           new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
+            width: { size: 40, type: WidthType.PERCENTAGE },
             borders: {
               top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
+              bottom: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // Thicker border
               left: { style: BorderStyle.NONE },
               right: { style: BorderStyle.NONE },
               insideHorizontal: { style: BorderStyle.NONE },
@@ -71,23 +71,24 @@ export function buildInvoice(data: Record<string, any>): Document {
               new TableRow({
                 children: [
                   new TableCell({
-                    width: { size: 15, type: WidthType.PERCENTAGE },
+                    width: { size: 40, type: WidthType.PERCENTAGE },
                     children: [
                       new Paragraph({
                         children: [
-                          new TextRun({ text: "INVOICE N°", font: "Arial", bold: true, size: 20 }),
+                          new TextRun({ text: "INVOICE N°", font: "Arial Black", size: 20 }),
                         ],
                       }),
                     ],
                     borders: { bottom: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
                   }),
                   new TableCell({
-                    width: { size: 85, type: WidthType.PERCENTAGE },
+                    width: { size: 60, type: WidthType.PERCENTAGE },
                     children: [
                       new Paragraph({
                         children: [
                           new TextRun({ text: data.invoice_ref || "0001", font: "Arial", size: 20 }),
                         ],
+                        alignment: AlignmentType.RIGHT
                       }),
                     ],
                     borders: { bottom: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
@@ -117,7 +118,7 @@ export function buildInvoice(data: Record<string, any>): Document {
                   new TableCell({
                     width: { size: 40, type: WidthType.PERCENTAGE },
                     children: [
-                      new Paragraph({ children: [new TextRun({ text: "FROM", font: "Arial", bold: true, size: 16 })], spacing: { after: 100 } }),
+                      new Paragraph({ children: [new TextRun({ text: "FROM", font: "Arial Black", size: 16 })], spacing: { after: 100 } }),
                       new Paragraph({ children: [new TextRun({ text: fromName, font: "Arial", size: 16 })] }),
                       new Paragraph({ children: [new TextRun({ text: fromEmail, font: "Arial", size: 16 })] }),
                     ],
@@ -125,14 +126,14 @@ export function buildInvoice(data: Record<string, any>): Document {
                   new TableCell({
                     width: { size: 40, type: WidthType.PERCENTAGE },
                     children: [
-                      new Paragraph({ children: [new TextRun({ text: "TO", font: "Arial", bold: true, size: 16 })], spacing: { after: 100 } }),
+                      new Paragraph({ children: [new TextRun({ text: "TO", font: "Arial Black", size: 16 })], spacing: { after: 100 } }),
                       new Paragraph({ children: [new TextRun({ text: clientName, font: "Arial", size: 16 })] }),
                     ],
                   }),
                   new TableCell({
                     width: { size: 20, type: WidthType.PERCENTAGE },
                     children: [
-                      new Paragraph({ children: [new TextRun({ text: "DATE", font: "Arial", bold: true, size: 16 })], spacing: { after: 100 } }),
+                      new Paragraph({ children: [new TextRun({ text: "DATE", font: "Arial Black", size: 16 })], spacing: { after: 100 } }),
                       new Paragraph({ children: [new TextRun({ text: invoiceDate, font: "Arial", size: 16 })] }),
                     ],
                   }),
@@ -148,7 +149,7 @@ export function buildInvoice(data: Record<string, any>): Document {
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: {
               top: { style: BorderStyle.NONE },
-              bottom: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
+              bottom: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // Thicker border
               left: { style: BorderStyle.NONE },
               right: { style: BorderStyle.NONE },
               insideHorizontal: { style: BorderStyle.NONE },
@@ -157,10 +158,10 @@ export function buildInvoice(data: Record<string, any>): Document {
             rows: [
               new TableRow({
                 children: [
-                  new TableCell({ width: { size: 55, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "DESCRIPTION OF SERVICES", font: "Arial", bold: true, size: 16 })] })] }),
-                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "QTY", font: "Arial", bold: true, size: 16 })] })] }),
-                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "HOURS", font: "Arial", bold: true, size: 16 })] })] }),
-                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "SUBTOTAL", font: "Arial", bold: true, size: 16 })] })] }),
+                  new TableCell({ width: { size: 55, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "DESCRIPTION OF SERVICES", font: "Arial Black", size: 16 })] })] }),
+                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "QTY", font: "Arial Black", size: 16 })] })] }),
+                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "HOURS", font: "Arial Black", size: 16 })] })] }),
+                  new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "SUBTOTAL", font: "Arial Black", size: 16 })] })] }),
                 ],
               }),
             ],
@@ -180,16 +181,16 @@ export function buildInvoice(data: Record<string, any>): Document {
             rows: lineItems.length > 0 
               ? lineItems.map((item: any) => new TableRow({
                   children: [
-                    new TableCell({ width: { size: 55, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: item.description || "", font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
-                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "1", font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
-                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "-", font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
-                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: Number(item.amount || 0).toFixed(2), font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
+                    new TableCell({ width: { size: 55, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: item.description || "", font: "Arial", size: 18 })], spacing: { before: 200, after: 100 } })] }),
+                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "1", font: "Arial", size: 18 })], spacing: { before: 200, after: 100 } })] }),
+                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "-", font: "Arial", size: 18 })], spacing: { before: 200, after: 100 } })] }),
+                    new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: Number(item.amount || 0).toFixed(2), font: "Arial", size: 18 })], spacing: { before: 200, after: 100 } })] }),
                   ],
                 }))
               : [
                   new TableRow({
                     children: [
-                      new TableCell({ width: { size: 100, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "No line items specified.", font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
+                      new TableCell({ width: { size: 100, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "No line items specified.", font: "Arial", size: 18 })], spacing: { before: 200, after: 100 } })] }),
                     ],
                   })
                 ],
@@ -211,15 +212,15 @@ export function buildInvoice(data: Record<string, any>): Document {
             rows: [
               new TableRow({
                 children: [
-                  new TableCell({ width: { size: 70, type: WidthType.PERCENTAGE }, children: [] }),
+                  new TableCell({ width: { size: 65, type: WidthType.PERCENTAGE }, children: [] }),
                   new TableCell({
-                    width: { size: 30, type: WidthType.PERCENTAGE },
+                    width: { size: 35, type: WidthType.PERCENTAGE },
                     children: [
                       new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         borders: {
-                          top: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
-                          bottom: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
+                          top: { style: BorderStyle.SINGLE, size: 24, color: "000000" },
+                          bottom: { style: BorderStyle.SINGLE, size: 24, color: "000000" },
                           left: { style: BorderStyle.NONE },
                           right: { style: BorderStyle.NONE },
                           insideHorizontal: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
@@ -228,14 +229,14 @@ export function buildInvoice(data: Record<string, any>): Document {
                         rows: [
                           new TableRow({
                             children: [
-                              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TAXES", font: "Arial", bold: true, size: 16 })], spacing: { before: 60, after: 60 } })] }),
-                              new TableCell({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "0%", font: "Arial", size: 18 })], spacing: { before: 60, after: 60 } })] }),
+                              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TAXES", font: "Arial Black", size: 16 })], spacing: { before: 100, after: 100 } })] }),
+                              new TableCell({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "0%", font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
                             ],
                           }),
                           new TableRow({
                             children: [
-                              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TOTAL", font: "Arial", bold: true, size: 16 })], spacing: { before: 60, after: 60 } })] }),
-                              new TableCell({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: Number(totalAmount).toFixed(2), font: "Arial", size: 18 })], spacing: { before: 60, after: 60 } })] }),
+                              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TOTAL", font: "Arial Black", size: 16 })], spacing: { before: 100, after: 100 } })] }),
+                              new TableCell({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: Number(totalAmount).toFixed(2), font: "Arial", size: 18 })], spacing: { before: 100, after: 100 } })] }),
                             ],
                           }),
                         ],
@@ -251,67 +252,64 @@ export function buildInvoice(data: Record<string, any>): Document {
         // Footer for QR, Terms, Payment Details
         footers: {
           default: new Footer({
-          children: [
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              borders: {
-                top: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
-                bottom: { style: BorderStyle.NONE },
-                left: { style: BorderStyle.NONE },
-                right: { style: BorderStyle.NONE },
-                insideHorizontal: { style: BorderStyle.NONE },
-                insideVertical: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
-              },
-              rows: [
-                new TableRow({
-                  children: [
-                    // QR Code Placeholder
-                    new TableCell({
-                      width: { size: 20, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({
-                          alignment: AlignmentType.CENTER,
-                          children: [
-                            new TextRun({
-                              text: "[ QR CODE PLACEHOLDER ]",
-                              font: "Arial",
-                              bold: true,
-                              size: 16,
-                              color: "888888"
-                            }),
-                          ],
-                          spacing: { before: 100 }
-                        })
-                      ],
-                      margins: { top: 100, bottom: 100, left: 0, right: 100 },
-                      borders: { right: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
-                    }),
-                    // Terms and Conditions
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "TERMS AND CONDITIONS", font: "Arial", bold: true, size: 14 })], spacing: { after: 100 } }),
-                        new Paragraph({ children: [new TextRun({ text: `Payment is due within ${paymentTermsDays} days of invoice date unless otherwise agreed in writing. Late payments are subject to a 5% late fee after 10 days. All services rendered are non-refundable. By submitting payment, you agree to the outlined terms and deliverables.`, font: "Arial", size: 14, color: "444444" })] }),
-                      ],
-                      margins: { top: 100, bottom: 100, left: 200, right: 200 },
-                      borders: { left: { style: BorderStyle.SINGLE, size: 12, color: "000000" }, right: { style: BorderStyle.SINGLE, size: 12, color: "000000" }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
-                    }),
-                    // Payments Methods
-                    new TableCell({
-                      width: { size: 30, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "PAYMENTS METHODS", font: "Arial", bold: true, size: 14 })], spacing: { after: 100 } }),
-                        new Paragraph({ children: [new TextRun({ text: "Hisako LTD\nBANK ACCOUNT NUMBER: 2020286430841\nSWIFT NUMBER: EQBLKENAXXX", font: "Arial", size: 14, color: "444444" })] }),
-                      ],
-                      margins: { top: 100, bottom: 100, left: 200, right: 0 },
-                      borders: { left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
-                    }),
-                  ],
-                })
-              ]
-            })
-          ]
-        })
+            children: [
+              new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: BorderStyle.SINGLE, size: 24, color: "000000" }, // Thick top line
+                  bottom: { style: BorderStyle.NONE },
+                  left: { style: BorderStyle.NONE },
+                  right: { style: BorderStyle.NONE },
+                  insideHorizontal: { style: BorderStyle.NONE },
+                  insideVertical: { style: BorderStyle.NONE }, // Removed inner vertical borders
+                },
+                rows: [
+                  new TableRow({
+                    children: [
+                      // QR Code Placeholder
+                      new TableCell({
+                        width: { size: 15, type: WidthType.PERCENTAGE },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: "[ QR CODE PLACEHOLDER ]",
+                                font: "Arial Black",
+                                size: 12,
+                                color: "888888"
+                              }),
+                            ],
+                            spacing: { before: 150 }
+                          })
+                        ],
+                        borders: { right: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
+                      }),
+                      // Terms and Conditions
+                      new TableCell({
+                        width: { size: 55, type: WidthType.PERCENTAGE },
+                        children: [
+                          new Paragraph({ children: [new TextRun({ text: "TERMS AND CONDITIONS", font: "Arial Black", size: 12 })], spacing: { after: 50, before: 150 } }),
+                          new Paragraph({ children: [new TextRun({ text: termsText, font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
+                        ],
+                        margins: { top: 0, bottom: 0, left: 200, right: 200 },
+                        borders: { left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
+                      }),
+                      // Payments Methods
+                      new TableCell({
+                        width: { size: 30, type: WidthType.PERCENTAGE },
+                        children: [
+                          new Paragraph({ children: [new TextRun({ text: "PAYMENTS METHODS", font: "Arial Black", size: 12 })], spacing: { after: 50, before: 150 } }),
+                          new Paragraph({ children: [new TextRun({ text: "Hisako LTD\\nBANK ACCOUNT NUMBER: 2020286430841\\nSWIFT NUMBER: EQBLKENAXXX", font: "Arial", size: 12, color: "444444" })], spacing: { line: 240 } }),
+                        ],
+                        margins: { top: 0, bottom: 0, left: 100, right: 0 },
+                        borders: { left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE } }
+                      }),
+                    ],
+                  })
+                ]
+              })
+            ]
+          })
         }
       }
     ]
