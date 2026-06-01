@@ -54,11 +54,13 @@ export function ClientProfileClient({
   initialActivities,
   initialDocuments,
   initialInvoices,
+  initialVendors,
 }: {
   initialClient: Client;
   initialActivities: ExtendedActivity[];
   initialDocuments: ExtendedDoc[];
   initialInvoices: Invoice[];
+  initialVendors?: any[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -282,11 +284,12 @@ export function ClientProfileClient({
 
       {/* TASK 2: Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="finance">Finance</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="tools">Tools</TabsTrigger>
         </TabsList>
         
         {/* TAB 1: OVERVIEW */}
@@ -737,6 +740,49 @@ export function ClientProfileClient({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="tools" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Client Tools</h3>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => window.location.href = "/vendors?tab=client"}>
+                View Registry
+              </Button>
+              <Button onClick={() => window.location.href = `/vendors?tab=client&add=true&client=${client.id}`}>
+                <Plus className="mr-2 h-4 w-4" /> Add Tool
+              </Button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(initialVendors || []).map(v => (
+              <Card key={v.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between">
+                    <Badge variant="outline" className="capitalize">{v.category.replace('_', ' ')}</Badge>
+                    {v.monthly_cost ? <span className="font-bold text-sm">${v.monthly_cost}/mo</span> : null}
+                  </div>
+                  <CardTitle className="text-lg mt-2">{v.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm">
+                  {v.login_url && <a href={v.login_url} target="_blank" className="text-blue-600 hover:underline block mb-1">Login URL</a>}
+                  {v.login_email && <div className="text-zinc-500 truncate">{v.login_email}</div>}
+                  {v.notes && <div className="text-zinc-400 mt-2 text-xs italic">{v.notes}</div>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {(!initialVendors || initialVendors.length === 0) && (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-sm text-zinc-500">
+                  No tools tracked for this client yet. 
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

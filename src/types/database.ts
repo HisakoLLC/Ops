@@ -131,3 +131,22 @@ export interface Expense {
   logged_by: string | null;
   created_at: string;
 }
+
+export interface Vendor {
+  id: string;
+  name: string;
+  category: 'automation' | 'ai_model' | 'crm' | 'email' | 'database' | 'communication' | 'infrastructure' | 'other';
+  website: string | null;
+  login_email: string | null;
+  login_url: string | null;
+  notes: string | null;
+  is_client_tool: boolean;
+  client_id: string | null;
+  monthly_cost: number | null;
+  billing_cycle: 'monthly' | 'annual' | 'usage' | 'free' | null;
+  renewal_date: string | null;
+  active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
