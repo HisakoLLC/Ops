@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SendInvoiceButton from "@/components/SendInvoiceButton";
 import {
   Table,
   TableBody,
@@ -383,14 +384,24 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          {inv.status === 'draft' && <Button size="sm" variant="ghost" onClick={() => handleUpdateInvoiceStatus(inv.id, 'sent')}>Send</Button>}
+                          {['draft', 'sent', 'overdue'].includes(inv.status) && (
+                            <SendInvoiceButton 
+                              invoiceId={inv.id} 
+                              clientEmail={inv.clients?.contact_email || ''} 
+                              invoiceRef={inv.invoice_ref || 'Draft'} 
+                              amount={formatUSD(inv.amount)} 
+                              onSuccess={() => {
+                                if (inv.status === 'draft') handleUpdateInvoiceStatus(inv.id, 'sent');
+                              }}
+                            />
+                          )}
                           {(inv.status === 'sent' || inv.status === 'overdue') && <Button size="sm" variant="ghost" className="text-emerald-600" onClick={() => handleUpdateInvoiceStatus(inv.id, 'paid', inv.client_id)}>Mark Paid</Button>}
                           {inv.status === 'overdue' && <Button size="sm" variant="ghost" className="text-red-500" onClick={() => handleSendReminder(inv)}><Bell className="h-4 w-4" /></Button>}
-                          <Button size="sm" variant="ghost" asChild>
-                            <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                          <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="ghost" type="button">
                               <Download className="h-4 w-4" />
-                            </a>
-                          </Button>
+                            </Button>
+                          </a>
                         </div>
                       </TableCell>
                     </TableRow>

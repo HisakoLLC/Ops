@@ -13,7 +13,8 @@ import {
 import { Client, Activity, Document as DocType, Invoice } from "@/types";
 import { PIPELINE_STAGES, DOC_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
-import SendDocumentButton from "@/components/SendDocumentButton";
+import SendDocumentButton from '@/components/SendDocumentButton';
+import SendInvoiceButton from '@/components/SendInvoiceButton';
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -488,11 +489,19 @@ export function ClientProfileClient({
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Button size="sm" variant="ghost" asChild>
-                          <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                        {['draft', 'sent', 'overdue'].includes(inv.status) && (
+                          <SendInvoiceButton 
+                            invoiceId={inv.id} 
+                            clientEmail={client.contact_email || ''} 
+                            invoiceRef={inv.invoice_ref || 'Draft'} 
+                            amount={formatUSD(inv.amount)} 
+                          />
+                        )}
+                        <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                          <Button size="sm" variant="ghost" type="button">
                             <Download className="h-4 w-4" />
-                          </a>
-                        </Button>
+                          </Button>
+                        </a>
                       </td>
                     </tr>
                   ))

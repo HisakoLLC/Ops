@@ -142,6 +142,70 @@ export async function POST(req: NextRequest) {
   } else if (type === 'invoice') {
     subject = `Invoice ${templateData.invoiceRef} — Hisako Technologies`
     html = invoiceEmail({ ...templateData, senderName })
+
+    // Generate invoice PDF on the fly
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('*, clients(company_name, contact_name, contact_email)')
+      .eq('id', documentId)
+      .single()
+
+    if (invoice) {
+      const mergedData = {
+        invoice_ref: invoice.invoice_ref,
+        client_name: invoice.clients?.company_name || "[Client Name]",
+        issued_date: invoice.issued_date,
+        due_date: invoice.due_date,
+        status: invoice.status,
+        amount: invoice.amount,
+        line_items: invoice.line_items || [],
+      }
+
+      const { buildDocument } = await import('@/lib/documents')
+      const { Packer } = await import('docx')
+      const doc = buildDocument("invoice", mergedData)
+      const docxBuffer = await Packer.toBuffer(doc)
+
+      // Convert to PDF via Gotenberg
+      try {
+        const formData = new FormData()
+        formData.append("files", new Blob([new Uint8Array(docxBuffer)]), "invoice.docx")
+
+        const pdfResponse = await fetch("https://demo.gotenberg.dev/forms/libreoffice/convert", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (pdfResponse.ok) {
+          const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer())
+          attachments.push({
+            filename: `${invoice.invoice_ref || 'invoice'}_Hisako.pdf`,
+            content: pdfBuffer,
+          })
+        } else {
+          // Fallback to docx
+          attachments.push({
+            filename: `${invoice.invoice_ref || 'invoice'}_Hisako.docx`,
+            content: docxBuffer,
+          })
+        }
+      } catch (e) {
+        // Fallback to docx
+        attachments.push({
+          filename: `${invoice.invoice_ref || 'invoice'}_Hisako.docx`,
+          content: docxBuffer,
+        })
+      }
+
+      // Log invoice sent
+      await supabase.from('activities').insert({
+        client_id: invoice.client_id,
+        created_by: user.id,
+        type: 'email',
+        title: `Invoice emailed: ${invoice.invoice_ref}`,
+        metadata: { invoice_id: documentId, recipient: to },
+      })
+    }
   }
 
   try {

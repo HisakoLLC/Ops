@@ -50,27 +50,37 @@ export async function GET(req: NextRequest) {
     }
 
     // Generate PDF via Gotenberg
-    const formData = new FormData();
-    formData.append("files", new Blob([new Uint8Array(docxBuffer)]), "invoice.docx");
+    try {
+      const formData = new FormData();
+      formData.append("files", new Blob([new Uint8Array(docxBuffer)]), "invoice.docx");
 
-    const pdfResponse = await fetch("https://demo.gotenberg.dev/forms/libreoffice/convert", {
-      method: "POST",
-      body: formData,
-    });
+      const pdfResponse = await fetch("https://demo.gotenberg.dev/forms/libreoffice/convert", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!pdfResponse.ok) {
-      throw new Error(`Gotenberg PDF conversion failed: ${pdfResponse.statusText}`);
+      if (!pdfResponse.ok) {
+        throw new Error(`Gotenberg PDF conversion failed: ${pdfResponse.statusText}`);
+      }
+
+      const pdfArrayBuffer = await pdfResponse.arrayBuffer();
+      const pdfBuffer = Buffer.from(pdfArrayBuffer);
+
+      return new NextResponse(pdfBuffer, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.pdf"`,
+        },
+      });
+    } catch (e) {
+      console.error("Gotenberg failed, falling back to DOCX:", e);
+      return new NextResponse(docxBuffer, {
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.docx"`,
+        },
+      });
     }
-
-    const pdfArrayBuffer = await pdfResponse.arrayBuffer();
-    const pdfBuffer = Buffer.from(pdfArrayBuffer);
-
-    return new NextResponse(pdfBuffer, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.pdf"`,
-      },
-    });
 
   } catch (err: any) {
     console.error("Download invoice error:", err);
