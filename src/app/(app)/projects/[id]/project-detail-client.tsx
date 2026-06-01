@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { Project, Task, Milestone } from "@/types";
 import { CheckSquare, Circle, Plus, Trash, Settings, Calendar, Briefcase, User as UserIcon } from "lucide-react";
@@ -48,7 +49,10 @@ function SortableTask({ task, onClick, profiles }: { task: any, onClick: () => v
 
 export function ProjectDetailClient({ initialProject, initialTasks, initialMilestones, teamProfiles }: { initialProject: any, initialTasks: any[], initialMilestones: any[], teamProfiles: any[] }) {
   const supabase = createClient();
+  const router = useRouter();
   const [project, setProject] = useState(initialProject);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [projectForm, setProjectForm] = useState(initialProject);
   const [tasks, setTasks] = useState(initialTasks);
   const [milestones, setMilestones] = useState(initialMilestones);
   
@@ -148,6 +152,34 @@ export function ProjectDetailClient({ initialProject, initialTasks, initialMiles
     setNewMilestone({ name: '', due_date: '' });
   };
 
+  const saveProjectSettings = async () => {
+    const { error } = await supabase.from('projects').update({
+      name: projectForm.name,
+      description: projectForm.description,
+      phase: projectForm.phase,
+      status: projectForm.status,
+      target_end_date: projectForm.target_end_date || null
+    }).eq('id', project.id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setProject({ ...project, ...projectForm });
+      setIsSettingsModalOpen(false);
+      toast.success("Project settings saved");
+    }
+  };
+
+  const deleteProject = async () => {
+    if (!confirm("Are you sure you want to delete this project? This action is irreversible.")) return;
+    const { error } = await supabase.from('projects').delete().eq('id', project.id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Project deleted");
+      router.push('/projects');
+    }
+  };
+
   return (
     <div className="space-y-6 flex flex-col h-[calc(100vh-100px)]">
       <div className="flex items-center justify-between">
@@ -165,7 +197,9 @@ export function ProjectDetailClient({ initialProject, initialTasks, initialMiles
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline"><Settings className="h-4 w-4 mr-2"/> Settings</Button>
+          <Button variant="outline" onClick={() => setIsSettingsModalOpen(true)}>
+            <Settings className="h-4 w-4 mr-2"/> Settings
+          </Button>
         </div>
       </div>
 
@@ -335,6 +369,64 @@ export function ProjectDetailClient({ initialProject, initialTasks, initialMiles
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsMilestoneModalOpen(false)}>Cancel</Button>
             <Button className="bg-[#E8400C] text-white" onClick={addMilestone}>Add Milestone</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Project Settings</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Project Name</Label>
+              <Input value={projectForm.name || ''} onChange={e => setProjectForm({...projectForm, name: e.target.value})} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Description</Label>
+              <Textarea value={projectForm.description || ''} onChange={e => setProjectForm({...projectForm, description: e.target.value})} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Phase</Label>
+                <Select value={projectForm.phase} onValueChange={v => setProjectForm({...projectForm, phase: v})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="map">Map</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="build">Build</SelectItem>
+                    <SelectItem value="live">Live</SelectItem>
+                    <SelectItem value="retainer">Retainer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Status</Label>
+                <Select value={projectForm.status} onValueChange={v => setProjectForm({...projectForm, status: v})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="on_track">On Track</SelectItem>
+                    <SelectItem value="at_risk">At Risk</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
+                    <SelectItem value="complete">Complete</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Target End Date</Label>
+              <Input type="date" value={projectForm.target_end_date || ''} onChange={e => setProjectForm({...projectForm, target_end_date: e.target.value})} />
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between items-center sm:justify-between">
+            <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={deleteProject}>
+              <Trash className="h-4 w-4 mr-2" /> Delete
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsSettingsModalOpen(false)}>Cancel</Button>
+              <Button className="bg-[#E8400C] text-white hover:bg-[#E8400C]/90" onClick={saveProjectSettings}>Save Changes</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
