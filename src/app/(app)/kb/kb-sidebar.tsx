@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BookOpen, Search, Plus, GitBranch, Users, FileText, UserCheck, Code2, Layers } from "lucide-react";
+import { BookOpen, Search, Plus, GitBranch, Users, FileText, UserCheck, Code2, Layers, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +25,7 @@ export function KBSidebar({ categories: initialCategories, isAdmin }: { categori
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: '', icon: 'BookOpen' });
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleSaveCategory = async () => {
     if (!newCat.name) return toast.error("Name is required");
@@ -52,39 +53,49 @@ export function KBSidebar({ categories: initialCategories, isAdmin }: { categori
   };
 
   return (
-    <div className="w-[260px] border-r bg-white dark:bg-zinc-950 flex flex-col h-full">
-      <div className="p-4 border-b">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
-          <Input 
-            placeholder="Search KB..." 
-            className="pl-9"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={handleSearch}
-          />
-        </div>
+    <div className={cn("border-r bg-white dark:bg-zinc-950 flex flex-col h-full transition-all duration-300", isCollapsed ? "w-[68px]" : "w-[260px]")}>
+      <div className={cn("p-4 border-b flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
+        {!isCollapsed && <span className="font-semibold text-sm">KB Navigation</span>}
+        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-zinc-500">
+          {isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </Button>
       </div>
+      {!isCollapsed && (
+        <div className="p-4 border-b">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
+            <Input 
+              placeholder="Search KB..." 
+              className="pl-9"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={handleSearch}
+            />
+          </div>
+        </div>
+      )}
       
       <div className="flex-1 overflow-y-auto py-4">
         <div className="px-3 mb-2">
           <Link 
             href="/kb" 
             className={cn(
-              "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              pathname === '/kb' ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-50"
+              "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+              pathname === '/kb' ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-50",
+              isCollapsed ? "justify-center" : "justify-between"
             )}
+            title={isCollapsed ? "All Articles" : undefined}
           >
             <div className="flex items-center gap-3">
-              <Layers className="h-4 w-4 text-zinc-500" />
-              All Articles
+              <Layers className={cn("h-4 w-4", pathname === '/kb' ? "text-[#E8400C]" : "text-zinc-500")} />
+              {!isCollapsed && "All Articles"}
             </div>
-            <span className="text-xs text-zinc-500">{categories.reduce((a, c) => a + c.articleCount, 0)}</span>
+            {!isCollapsed && <span className="text-xs text-zinc-500">{categories.reduce((a, c) => a + c.articleCount, 0)}</span>}
           </Link>
         </div>
 
         <div className="px-3 py-2">
-          <h4 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Categories</h4>
+          {!isCollapsed && <h4 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Categories</h4>}
           <div className="space-y-1">
             {categories.map((c) => {
               const Icon = ICONS[c.icon] || BookOpen;
@@ -95,14 +106,16 @@ export function KBSidebar({ categories: initialCategories, isAdmin }: { categori
                   href={`/kb/category/${c.id}`}
                   className={cn(
                     "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    isActive ? "bg-zinc-100 dark:bg-zinc-900 text-[#E8400C]" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-50"
+                    isActive ? "bg-zinc-100 dark:bg-zinc-900 text-[#E8400C]" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-50",
+                    isCollapsed ? "justify-center" : "justify-between"
                   )}
+                  title={isCollapsed ? c.name : undefined}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={cn("h-4 w-4", isActive ? "text-[#E8400C]" : "text-zinc-500")} />
-                    {c.name}
+                    {!isCollapsed && c.name}
                   </div>
-                  <span className="text-xs text-zinc-500">{c.articleCount}</span>
+                  {!isCollapsed && <span className="text-xs text-zinc-500">{c.articleCount}</span>}
                 </Link>
               );
             })}
@@ -112,8 +125,8 @@ export function KBSidebar({ categories: initialCategories, isAdmin }: { categori
 
       {isAdmin && (
         <div className="p-4 border-t">
-          <Button variant="ghost" className="w-full justify-start text-zinc-500" onClick={() => setIsModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New Category
+          <Button variant="ghost" className={cn("w-full text-zinc-500", isCollapsed ? "justify-center px-0" : "justify-start")} onClick={() => setIsModalOpen(true)} title={isCollapsed ? "New Category" : undefined}>
+            <Plus className={cn("h-4 w-4", !isCollapsed && "mr-2")} /> {!isCollapsed && "New Category"}
           </Button>
         </div>
       )}
