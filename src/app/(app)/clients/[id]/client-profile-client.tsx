@@ -7,7 +7,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { 
   Globe, Edit, Plus, FileText, StickyNote, Phone, Mail, 
-  Calendar, ArrowRight, DollarSign, Download, RefreshCw, CheckCircle2 
+  Calendar, ArrowRight, DollarSign, Download, RefreshCw, CheckCircle2, ChevronDown 
 } from "lucide-react";
 
 import { Client, Activity, Document as DocType } from "@/types";
@@ -488,22 +488,25 @@ export function ClientProfileClient({
                         {doc.storage_path ? (
                           <>
                             {["proposal", "nda", "services_agreement", "monthly_report"].includes(doc.doc_type) ? (
-                              <>
-                                <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}&format=pdf`} target="_blank" rel="noreferrer" />}>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger render={<Button variant="default" size="sm" className="flex-1" />}>
                                     <Download className="mr-2 h-4 w-4" />
+                                    Download
+                                    <ChevronDown className="ml-1.5 h-4 w-4 opacity-75" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-1 rounded-md shadow-md w-44 z-50">
+                                  <DropdownMenuItem render={<a href={`/api/documents/download?id=${doc.id}&format=pdf`} target="_blank" rel="noreferrer" className="flex w-full items-center px-2 py-1.5 text-sm outline-none cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded" />}>
                                     Download PDF
-                                </Button>
-                                {["nda", "services_agreement"].includes(doc.doc_type) && (
-                                  <Button variant="outline" size="sm" render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" />}>
-                                      <Download className="mr-2 h-4 w-4" />
-                                      Editable (.docx)
-                                  </Button>
-                                )}
-                              </>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" className="flex w-full items-center px-2 py-1.5 text-sm outline-none cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded" />}>
+                                    {["nda", "services_agreement"].includes(doc.doc_type) ? "Editable (.docx)" : "Word Doc (.docx)"}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             ) : (
                               <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" />}>
                                   <Download className="mr-2 h-4 w-4" />
-                                  Download (.docx)
+                                  Download
                               </Button>
                             )}
                             {!["discovery_script", "intake_questionnaire", "onboarding_checklist"].includes(doc.doc_type) && (
