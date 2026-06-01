@@ -213,6 +213,7 @@ export function invoiceEmail(data: {
   invoiceType: string
   senderName?: string
   isReminder?: boolean
+  message?: string
 }) {
   const typeLabel = {
     deposit: '50% Deposit — Commencement of Work',
@@ -238,7 +239,7 @@ export function invoiceEmail(data: {
             <div class="label">${data.isReminder ? 'Reminder' : 'Invoice'}</div>
             <h1 class="headline">${headline}</h1>
             <p class="text">Hi ${data.clientName || 'Client'},</p>
-            <p class="text">${introText}</p>
+            <p class="text">${data.message || introText}</p>
             <hr class="rule">
             <table class="meta-table">
               <tr>
