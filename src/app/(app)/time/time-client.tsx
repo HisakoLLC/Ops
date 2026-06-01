@@ -112,7 +112,7 @@ export function TimeClient({
           <div className="grid gap-1.5 flex-1 min-w-[200px]">
             <Label className="text-xs text-zinc-500 uppercase tracking-wider">Client</Label>
             <Select value={form.client_id} onValueChange={v => setForm({...form, client_id: v ?? '', project_id: '', task_id: ''})}>
-              <SelectTrigger><SelectValue placeholder="Select Client" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select Client">{clients.find(c => c.id === form.client_id)?.company_name}</SelectValue></SelectTrigger>
               <SelectContent>
                 {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
               </SelectContent>
@@ -122,7 +122,7 @@ export function TimeClient({
           <div className="grid gap-1.5 flex-1 min-w-[150px]">
             <Label className="text-xs text-zinc-500 uppercase tracking-wider">Project</Label>
             <Select value={form.project_id || 'none'} onValueChange={v => setForm({...form, project_id: (v === 'none' || !v) ? '' : v, task_id: ''})} disabled={!form.client_id}>
-              <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Optional">{form.project_id && form.project_id !== 'none' ? projects.find(p => p.id === form.project_id)?.name : 'No Project'}</SelectValue></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No Project</SelectItem>
                 {projects.filter(p => p.client_id === form.client_id).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
@@ -178,7 +178,7 @@ export function TimeClient({
 
       <div className="flex justify-end">
         <Select value={clientFilter} onValueChange={v => setClientFilter(v ?? 'all')}>
-          <SelectTrigger className="w-[200px]"><SelectValue placeholder="Filter by Client" /></SelectTrigger>
+          <SelectTrigger className="w-[200px]"><SelectValue placeholder="Filter by Client">{clientFilter && clientFilter !== 'all' ? clients.find(c => c.id === clientFilter)?.company_name : 'All Clients'}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Clients</SelectItem>
             {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}

@@ -502,7 +502,7 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
             <div className="grid gap-2">
               <Label>Client *</Label>
               <Select value={invoiceForm.client_id || ''} onValueChange={v => setInvoiceForm({...invoiceForm, client_id: v})}>
-                <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select a client">{clients.find(c => c.id === invoiceForm.client_id)?.company_name}</SelectValue></SelectTrigger>
                 <SelectContent>
                   {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
                 </SelectContent>

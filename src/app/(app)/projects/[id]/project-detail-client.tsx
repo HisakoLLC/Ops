@@ -284,7 +284,7 @@ export function ProjectDetailClient({ initialProject, initialTasks, initialMiles
                   <div className="grid gap-2">
                     <Label>Assignee</Label>
                     <Select value={activeTask.assigned_to || 'unassigned'} onValueChange={v => setActiveTask({...activeTask, assigned_to: v === 'unassigned' ? null : v})}>
-                      <SelectTrigger><SelectValue/></SelectTrigger>
+                      <SelectTrigger><SelectValue>{activeTask.assigned_to && activeTask.assigned_to !== 'unassigned' ? teamProfiles.find(p => p.id === activeTask.assigned_to)?.full_name : 'Unassigned'}</SelectValue></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned">Unassigned</SelectItem>
                         {teamProfiles.map(p => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}

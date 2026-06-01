@@ -332,7 +332,7 @@ export function VendorsClient({ initialVendors, clients }: { initialVendors: any
               <div className="grid gap-2">
                 <Label>Client *</Label>
                 <Select value={vendorForm.client_id || ''} onValueChange={v => setVendorForm({...vendorForm, client_id: v})}>
-                  <SelectTrigger><SelectValue placeholder="Select Client" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select Client">{clients.find(c => c.id === vendorForm.client_id)?.company_name}</SelectValue></SelectTrigger>
                   <SelectContent>
                     {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
                   </SelectContent>
