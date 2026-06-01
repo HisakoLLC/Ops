@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
+    // Fetch settings for payment link
+    const { data: settings } = await supabase.from('settings').select('payment_link').limit(1).single();
+
     // Prepare data for the document builder
     const mergedData = {
       invoice_ref: invoice.invoice_ref,
@@ -34,6 +37,7 @@ export async function GET(req: NextRequest) {
       status: invoice.status,
       amount: invoice.amount,
       line_items: invoice.line_items || [],
+      payment_link: settings?.payment_link || "[ADD YOUR PAYMENT DETAILS]",
     };
 
     // Generate DOCX

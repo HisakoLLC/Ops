@@ -151,6 +151,9 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (invoice) {
+      // Fetch settings for payment link
+      const { data: settings } = await supabase.from('settings').select('payment_link').limit(1).single()
+
       const mergedData = {
         invoice_ref: invoice.invoice_ref,
         client_name: invoice.clients?.company_name || "[Client Name]",
@@ -159,6 +162,7 @@ export async function POST(req: NextRequest) {
         status: invoice.status,
         amount: invoice.amount,
         line_items: invoice.line_items || [],
+        payment_link: settings?.payment_link || "[ADD YOUR PAYMENT DETAILS]",
       }
 
       const { buildDocument } = await import('@/lib/documents')

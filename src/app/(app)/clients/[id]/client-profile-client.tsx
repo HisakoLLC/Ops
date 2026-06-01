@@ -494,6 +494,8 @@ export function ClientProfileClient({
                             invoiceId={inv.id} 
                             clientEmail={client.contact_email || ''} 
                             invoiceRef={inv.invoice_ref || 'Draft'} 
+                            dueDate={inv.due_date ? format(new Date(inv.due_date), "MMM d, yyyy") : undefined}
+                            clientName={client.company_name || 'Client'}
                             amount={formatUSD(inv.amount)} 
                           />
                         )}

@@ -35,6 +35,7 @@ const settingsSchema = z.object({
   payment_terms_days: z.coerce.number().optional(),
   late_payment_interest: z.coerce.number().optional(),
   retainer_notice_days: z.coerce.number().optional(),
+  payment_link: z.string().optional().or(z.literal("")),
 });
 
 type SettingsValues = z.infer<typeof settingsSchema>;
@@ -59,6 +60,7 @@ export function SettingsClient({ initialSettings }: any) {
       payment_terms_days: initialSettings?.payment_terms_days || 7,
       late_payment_interest: initialSettings?.late_payment_interest || 2.0,
       retainer_notice_days: initialSettings?.retainer_notice_days || 30,
+      payment_link: initialSettings?.payment_link || "",
     },
   });
 
@@ -103,6 +105,7 @@ export function SettingsClient({ initialSettings }: any) {
       payment_terms_days: 7,
       late_payment_interest: 2.0,
       retainer_notice_days: 30,
+      payment_link: "",
     });
     toast.info("Reset to default values. Don't forget to save.");
   };
@@ -145,6 +148,13 @@ export function SettingsClient({ initialSettings }: any) {
               <FormField control={form.control} name="registered_country" render={({ field }) => (
                 <FormItem><FormLabel>Registered Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
+                <FormField control={form.control} name="payment_link" render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>Payment Link / Bank Details</FormLabel>
+                    <FormControl><Textarea {...field} placeholder="E.g. Stripe link or bank wire details..." className="bg-white/5" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
             </CardContent>
           </Card>
 

@@ -231,8 +231,8 @@ export function invoiceEmail(data: {
           <div class="body">
             <div class="label">Invoice</div>
             <h1 class="headline">${typeLabel}.</h1>
-            <p class="text">Hi ${data.clientName},</p>
-            <p class="text">Please find the invoice details below. Payment is due within 7 days.</p>
+            <p class="text">Hi ${data.clientName || 'Client'},</p>
+            <p class="text">Please find the invoice details below. ${data.dueDate ? `Payment is due ${data.dueDate}.` : 'Payment is due upon receipt.'}</p>
             <hr class="rule">
             <table class="meta-table">
               <tr>
@@ -245,11 +245,11 @@ export function invoiceEmail(data: {
               </tr>
               <tr>
                 <td class="meta-key">Amount Due</td>
-                <td class="meta-val" style="font-size:20px;font-weight:900;color:#0A0A0A;">$${data.amount} USD</td>
+                <td class="meta-val" style="font-size:20px;font-weight:900;color:#0A0A0A;">${data.amount.includes('$') ? data.amount : `$${data.amount}`} USD</td>
               </tr>
               <tr>
                 <td class="meta-key">Due Date</td>
-                <td class="meta-val">${data.dueDate}</td>
+                <td class="meta-val">${data.dueDate || 'Upon receipt'}</td>
               </tr>
             </table>
             <p class="note">Payment details are included in the attached invoice document. Please reference the invoice number in your payment.</p>

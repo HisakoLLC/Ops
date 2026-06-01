@@ -389,6 +389,8 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
                               invoiceId={inv.id} 
                               clientEmail={inv.clients?.contact_email || ''} 
                               invoiceRef={inv.invoice_ref || 'Draft'} 
+                              dueDate={inv.due_date ? format(new Date(inv.due_date), "MMM d, yyyy") : undefined}
+                              clientName={inv.clients?.company_name || 'Client'}
                               amount={formatUSD(inv.amount)} 
                               onSuccess={() => {
                                 if (inv.status === 'draft') handleUpdateInvoiceStatus(inv.id, 'sent');

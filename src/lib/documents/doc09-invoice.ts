@@ -32,8 +32,8 @@ export function buildInvoice(data: Record<string, any>): Document {
         h2("Payment Terms"),
         p("Due upon receipt unless otherwise stated."),
         
-        h2("Bank Details"),
-        callout("[ADD YOUR PAYMENT DETAILS]"),
+        h2("Payment Details"),
+        callout(data.payment_link || "[ADD YOUR PAYMENT DETAILS]"),
         
         p(""),
         p("Thank you for your business!", true),

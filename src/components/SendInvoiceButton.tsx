@@ -14,10 +14,12 @@ interface Props {
   invoiceRef: string
   amount: string
   onSuccess?: () => void
+  dueDate?: string
+  clientName: string
 }
 
 export default function SendInvoiceButton({
-  invoiceId, clientEmail, invoiceRef, amount, onSuccess
+  invoiceId, clientEmail, invoiceRef, amount, onSuccess, dueDate, clientName
 }: Props) {
   const [open, setOpen] = useState(false)
   const [to, setTo] = useState(clientEmail)
@@ -34,7 +36,7 @@ export default function SendInvoiceButton({
           type: 'invoice',
           to,
           documentId: invoiceId, // We'll re-use documentId for the ID of the invoice
-          templateData: { message: message || undefined, invoiceRef, amount },
+          templateData: { message: message || undefined, invoiceRef, amount, dueDate, clientName },
         }),
       })
       const json = await res.json()
