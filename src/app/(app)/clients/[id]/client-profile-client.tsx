@@ -198,53 +198,22 @@ export function ClientProfileClient({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* TASK 1: Client Header */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-center justify-between rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">{client.company_name}</h1>
-            <Badge variant="secondary" className="font-mono text-xs text-zinc-500">{client.ref}</Badge>
-            {client.website && (
-              <a href={client.website.startsWith('http') ? client.website : `https://${client.website}`} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-zinc-900 transition-colors">
-                <Globe className="h-5 w-5" />
-              </a>
-            )}
-          </div>
-          <div className="text-sm text-zinc-500">
-            {client.contact_name} {client.contact_email && `• ${client.contact_email}`}
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Pipeline Stage</span>
-            <Select value={client.pipeline_stage || ""} onValueChange={(val) => handleStageChange(val as string)}>
-              <SelectTrigger className={`w-[180px] h-9 border-transparent text-white ${currentStageObj?.color || 'bg-zinc-500'}`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PIPELINE_STAGES.map((stage) => (
-                  <SelectItem key={stage.value} value={stage.value}>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${stage.color}`} />
-                      {stage.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex gap-6">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Pipeline Value</span>
-              <span className="font-semibold">{formatUSD(client.pipeline_value)}</span>
+      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
+        {/* Top Section: Profile Info & Actions */}
+        <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-center justify-between border-b border-zinc-100 dark:border-zinc-900">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight">{client.company_name}</h1>
+              <Badge variant="secondary" className="font-mono text-xs text-zinc-500">{client.ref}</Badge>
+              {client.website && (
+                <a href={client.website.startsWith('http') ? client.website : `https://${client.website}`} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-zinc-900 transition-colors">
+                  <Globe className="h-5 w-5" />
+                </a>
+              )}
             </div>
-            {client.retainer_active && (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Retainer</span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-500">{formatUSD(client.retainer_amount)}/mo</span>
-              </div>
-            )}
+            <div className="text-sm text-zinc-500">
+              {client.contact_name} {client.contact_email && `• ${client.contact_email}`}
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -266,6 +235,45 @@ export function ClientProfileClient({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+        </div>
+
+        {/* Bottom Section: Metrics Bar */}
+        <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-6 py-4 flex flex-col sm:flex-row gap-6 sm:items-center">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Pipeline Stage</span>
+            <Select value={client.pipeline_stage || ""} onValueChange={(val) => handleStageChange(val as string)}>
+              <SelectTrigger className={`w-[180px] h-9 border-transparent text-white ${currentStageObj?.color || 'bg-zinc-500'}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PIPELINE_STAGES.map((stage) => (
+                  <SelectItem key={stage.value} value={stage.value}>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${stage.color}`} />
+                      {stage.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-800 hidden sm:block" />
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Pipeline Value</span>
+            <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{formatUSD(client.pipeline_value)}</span>
+          </div>
+
+          {client.retainer_active && (
+            <>
+              <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-800 hidden sm:block" />
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Retainer</span>
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-500">{formatUSD(client.retainer_amount)}/mo</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
