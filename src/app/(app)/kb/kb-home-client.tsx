@@ -50,7 +50,7 @@ export function KBHomeClient({ articles, search, stats, isAdmin }: { articles: a
       {search && (
         <div className="mb-6 bg-zinc-100 dark:bg-zinc-900 p-3 rounded-lg text-sm text-zinc-600 flex items-center">
           <Search className="h-4 w-4 mr-2" />
-          Showing results for "{search}"
+          Showing results for &quot;{search}&quot;
         </div>
       )}
 
