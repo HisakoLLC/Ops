@@ -59,7 +59,7 @@ export function KBEditorClient({ article, categories, currentUserId }: { article
     }
     
     setIsSaving(true);
-    const tagsArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const tagsArray = form.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
 
     const payload = {
       title: form.title,
