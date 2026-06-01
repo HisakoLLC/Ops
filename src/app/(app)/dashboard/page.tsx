@@ -128,6 +128,14 @@ export default async function DashboardPage() {
     .neq("status", "done")
     .order("due_date", { ascending: true, nullsFirst: false });
 
+  const { data: myTimeToday } = await supabase
+    .from("time_entries")
+    .select("hours")
+    .eq("logged_by", userId)
+    .eq("date", new Date().toISOString().split('T')[0]);
+
+  const hoursLoggedToday = myTimeToday?.reduce((acc, curr) => acc + Number(curr.hours), 0) || 0;
+
   const formatUSD = (val: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
   };
@@ -291,8 +299,11 @@ export default async function DashboardPage() {
 
         {/* TASK 5: My Tasks */}
         <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>My Tasks</CardTitle>
+            <div className="text-sm text-zinc-500 font-medium">
+              Today: <span className="text-[#E8400C] font-bold">{hoursLoggedToday.toFixed(1)} hrs</span> logged
+            </div>
           </CardHeader>
           <CardContent>
             {myTasks && myTasks.length > 0 ? (

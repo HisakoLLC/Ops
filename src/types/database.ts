@@ -70,6 +70,15 @@ export interface Document {
   updated_at: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  role: 'admin' | 'member';
+  hourly_cost?: number;
+}
+
 export interface TeamInvite {
   id: string;
   email: string;
@@ -190,4 +199,18 @@ export interface Milestone {
   due_date: string | null;
   completed_at: string | null;
   created_at: string;
+}
+
+export interface TimeEntry {
+  id: string;
+  client_id: string;
+  project_id: string | null;
+  task_id: string | null;
+  logged_by: string;
+  description: string;
+  hours: number;
+  date: string;
+  billable: boolean;
+  created_at: string;
+  updated_at: string;
 }

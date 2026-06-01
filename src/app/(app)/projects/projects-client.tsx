@@ -208,7 +208,7 @@ export function ProjectsClient({ initialProjects, clients }: { initialProjects: 
             </div>
             <div className="grid gap-2">
               <Label>Client *</Label>
-              <Select value={form.client_id || ''} onValueChange={v => setForm({...form, client_id: v})}>
+              <Select value={form.client_id || ''} onValueChange={v => setForm({...form, client_id: v ?? undefined})}>
                 <SelectTrigger><SelectValue placeholder="Select Client" /></SelectTrigger>
                 <SelectContent>
                   {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>)}
@@ -218,7 +218,7 @@ export function ProjectsClient({ initialProjects, clients }: { initialProjects: 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Phase</Label>
-                <Select value={form.phase || 'map'} onValueChange={v => setForm({...form, phase: v as any})}>
+                <Select value={form.phase} onValueChange={v => setForm({...form, phase: (v as any) ?? undefined})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="map">Map</SelectItem>
@@ -231,7 +231,7 @@ export function ProjectsClient({ initialProjects, clients }: { initialProjects: 
               </div>
               <div className="grid gap-2">
                 <Label>Status</Label>
-                <Select value={form.status || 'on_track'} onValueChange={v => setForm({...form, status: v as any})}>
+                <Select value={form.status} onValueChange={v => setForm({...form, status: (v as any) ?? undefined})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="on_track">On Track</SelectItem>

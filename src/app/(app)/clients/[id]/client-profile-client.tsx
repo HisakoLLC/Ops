@@ -46,6 +46,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 type ExtendedActivity = Activity & { profiles?: { full_name: string | null; avatar_url: string | null } | null };
 type ExtendedDoc = DocType & { profiles?: { full_name: string | null } | null };
@@ -57,6 +58,7 @@ export function ClientProfileClient({
   initialInvoices,
   initialVendors,
   initialProjects,
+  initialTimeEntries,
 }: {
   initialClient: Client;
   initialActivities: ExtendedActivity[];
@@ -64,6 +66,7 @@ export function ClientProfileClient({
   initialInvoices: Invoice[];
   initialVendors?: any[];
   initialProjects?: any[];
+  initialTimeEntries?: any[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,6 +84,7 @@ export function ClientProfileClient({
   const [activityBody, setActivityBody] = useState("");
   const [isSubmittingActivity, setIsSubmittingActivity] = useState(false);
   const [projects, setProjects] = useState<any[]>(initialProjects || []);
+  const [timeEntries, setTimeEntries] = useState<any[]>(initialTimeEntries || []);
   const supabase = createClient();
 
   const handleStageChange = async (newStage: string) => {
@@ -303,6 +307,93 @@ export function ClientProfileClient({
           )}
         </div>
       </div>
+
+      {/* Calculate Time & Profit */}
+      {(() => {
+        const totalHrs = timeEntries.reduce((acc, e) => acc + Number(e.hours), 0);
+        const billableHrs = timeEntries.filter(e => e.billable).reduce((acc, e) => acc + Number(e.hours), 0);
+        const unbillableHrs = totalHrs - billableHrs;
+        
+        let totalCost = 0;
+        timeEntries.forEach(e => {
+          totalCost += Number(e.hours) * Number(e.profiles?.hourly_cost || 0);
+        });
+
+        const projectFee = Number(client.pipeline_value) || 0;
+        const grossProfit = projectFee - totalCost;
+        const margin = projectFee > 0 ? (grossProfit / projectFee) * 100 : 0;
+        const effectiveRate = totalHrs > 0 ? projectFee / totalHrs : 0;
+
+        // Group by phase
+        const phaseData = timeEntries.reduce((acc: any, e: any) => {
+          const phase = e.projects?.phase || 'unassigned';
+          if (!acc[phase]) acc[phase] = 0;
+          acc[phase] += Number(e.hours);
+          return acc;
+        }, {});
+        
+        const chartData = Object.keys(phaseData).map(k => ({ phase: k, hours: phaseData[k] }));
+
+        return (
+          <div className="mb-8 grid gap-4 grid-cols-1 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Time Tracked</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{totalHrs.toFixed(1)} <span className="text-sm text-zinc-500 font-normal">hrs</span></div>
+                <div className="flex gap-4 mt-2 text-sm">
+                  <div className="text-emerald-600 font-medium">Billable: {billableHrs.toFixed(1)}</div>
+                  <div className="text-zinc-500">Non-billable: {unbillableHrs.toFixed(1)}</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {projectFee > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex justify-between">
+                    Profitability
+                    <Badge variant={margin > 50 ? "default" : margin > 20 ? "secondary" : "destructive"}>
+                      {margin.toFixed(0)}% Margin
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="text-zinc-500">Project Fee</div>
+                    <div className="text-right font-medium">${projectFee.toLocaleString()}</div>
+                    <div className="text-zinc-500">Resource Cost</div>
+                    <div className="text-right text-red-600 font-medium">-${totalCost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>
+                    <div className="text-zinc-500 pt-2 border-t mt-1 font-semibold">Gross Profit</div>
+                    <div className="text-right pt-2 border-t mt-1 font-bold text-emerald-600">${grossProfit.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>
+                    <div className="text-zinc-500 text-xs">Effective Rate</div>
+                    <div className="text-right text-xs font-medium">${effectiveRate.toFixed(2)}/hr</div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {chartData.length > 0 && (
+              <Card className="md:col-span-2">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Hours by Phase</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <XAxis dataKey="phase" tickLine={false} axisLine={false} tickFormatter={(val) => val.charAt(0).toUpperCase() + val.slice(1)} />
+                      <YAxis tickLine={false} axisLine={false} />
+                      <Tooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} />
+                      <Bar dataKey="hours" fill="#E8400C" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+      })()}
 
       {/* TASK 2: Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">

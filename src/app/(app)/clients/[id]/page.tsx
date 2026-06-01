@@ -65,6 +65,12 @@ export default async function ClientProfilePage({
     .eq("client_id", id)
     .order("created_at", { ascending: false });
 
+  // Fetch time entries with profiles for hourly cost
+  const { data: timeEntries } = await supabase
+    .from("time_entries")
+    .select("*, profiles:logged_by(hourly_cost), projects(phase)")
+    .eq("client_id", id);
+
   return (
     <ClientProfileClient 
       initialClient={client} 
@@ -73,6 +79,7 @@ export default async function ClientProfilePage({
       initialInvoices={invoices || []}
       initialVendors={vendors || []}
       initialProjects={projects || []}
+      initialTimeEntries={timeEntries || []}
     />
   );
 }
