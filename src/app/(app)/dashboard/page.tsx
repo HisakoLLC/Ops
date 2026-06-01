@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PIPELINE_STAGES } from "@/lib/constants";
 import Link from "next/link";
 import { formatDistanceToNow, startOfMonth } from "date-fns";
-import { StickyNote, Phone, Mail, Calendar, ArrowRight, FileText, DollarSign, Users } from "lucide-react";
+import { StickyNote, Phone, Mail, Calendar, ArrowRight, FileText, DollarSign, Users, CheckCircle2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +117,16 @@ export default async function DashboardPage() {
     if (b.daysSince === "No") return 1;
     return (b.daysSince as number) - (a.daysSince as number);
   });
+  // TASK 5: My Tasks
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+
+  const { data: myTasks } = await supabase
+    .from("tasks")
+    .select("*, projects(name)")
+    .eq("assigned_to", userId)
+    .neq("status", "done")
+    .order("due_date", { ascending: true, nullsFirst: false });
 
   const formatUSD = (val: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
@@ -274,6 +284,55 @@ export default async function DashboardPage() {
               <div className="flex h-32 flex-col items-center justify-center space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
                 <span className="text-green-500">✓</span>
                 <span>All clients are up to date</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* TASK 5: My Tasks */}
+        <Card className="col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>My Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {myTasks && myTasks.length > 0 ? (
+              <div className="space-y-3">
+                {myTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between rounded-lg border border-zinc-200 p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/50">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-5 w-5 items-center justify-center rounded border border-zinc-300 dark:border-zinc-700">
+                        {/* Placeholder for Mark Done action, client side interaction ideally, but linking to project for now */}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="font-medium text-sm">
+                          <Link href={`/projects/${task.project_id}`} className="hover:text-[#E8400C] transition-colors">{task.title}</Link>
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {task.projects?.name}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {task.priority && (
+                        <div className={`text-[10px] uppercase px-2 py-0.5 rounded border font-semibold ${
+                          task.priority === 'urgent' ? 'border-red-200 text-red-600 bg-red-50' : 
+                          task.priority === 'high' ? 'border-orange-200 text-orange-600 bg-orange-50' : 
+                          'border-zinc-200 text-zinc-600 bg-zinc-50'
+                        }`}>
+                          {task.priority}
+                        </div>
+                      )}
+                      <div className="text-xs text-zinc-500 w-24 text-right">
+                        {task.due_date ? formatDistanceToNow(new Date(task.due_date), { addSuffix: true }) : 'No due date'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-32 flex-col items-center justify-center space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <CheckCircle2 className="h-6 w-6 text-zinc-300" />
+                <span>You have no pending tasks</span>
               </div>
             )}
           </CardContent>

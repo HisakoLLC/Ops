@@ -150,3 +150,44 @@ export interface Vendor {
   created_at: string;
   updated_at: string;
 }
+
+export interface Project {
+  id: string;
+  client_id: string;
+  name: string;
+  description: string | null;
+  phase: 'map' | 'design' | 'build' | 'live' | 'retainer';
+  status: 'on_track' | 'at_risk' | 'delayed' | 'complete';
+  start_date: string | null;
+  target_end_date: string | null;
+  actual_end_date: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Task {
+  id: string;
+  project_id: string;
+  client_id: string;
+  title: string;
+  description: string | null;
+  assigned_to: string | null;
+  status: 'todo' | 'in_progress' | 'blocked' | 'done';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  due_date: string | null;
+  completed_at: string | null;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Milestone {
+  id: string;
+  project_id: string;
+  name: string;
+  due_date: string | null;
+  completed_at: string | null;
+  created_at: string;
+}

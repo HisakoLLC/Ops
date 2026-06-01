@@ -55,12 +55,14 @@ export function ClientProfileClient({
   initialDocuments,
   initialInvoices,
   initialVendors,
+  initialProjects,
 }: {
   initialClient: Client;
   initialActivities: ExtendedActivity[];
   initialDocuments: ExtendedDoc[];
   initialInvoices: Invoice[];
   initialVendors?: any[];
+  initialProjects?: any[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,7 +79,7 @@ export function ClientProfileClient({
   const [activityTitle, setActivityTitle] = useState("");
   const [activityBody, setActivityBody] = useState("");
   const [isSubmittingActivity, setIsSubmittingActivity] = useState(false);
-
+  const [projects, setProjects] = useState<any[]>(initialProjects || []);
   const supabase = createClient();
 
   const handleStageChange = async (newStage: string) => {
@@ -123,6 +125,25 @@ export function ClientProfileClient({
 
     toast.success("Pipeline stage updated");
     router.refresh();
+    
+    if (newStage === 'signed') {
+      const createProject = window.confirm("Create a project for this engagement?");
+      if (createProject) {
+        const newProject = {
+          client_id: client.id,
+          name: `${client.company_name} — Pipeline Build`,
+          start_date: format(new Date(), "yyyy-MM-dd"),
+          phase: 'map',
+          status: 'on_track',
+          created_by: userData.user?.id
+        };
+        const { data: insertedProj, error: projErr } = await supabase.from('projects').insert([newProject]).select('*, tasks(id, status)').single();
+        if (!projErr && insertedProj) {
+          setProjects([insertedProj, ...projects]);
+          toast.success("Project created automatically");
+        }
+      }
+    }
   };
 
   const handleSaveNotes = async () => {
@@ -284,12 +305,13 @@ export function ClientProfileClient({
 
       {/* TASK 2: Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-4xl">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="finance">Finance</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="tools">Tools</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
         </TabsList>
         
         {/* TAB 1: OVERVIEW */}
@@ -783,6 +805,54 @@ export function ClientProfileClient({
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="projects" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Client Projects</h3>
+            <Button onClick={() => router.push("/projects")}>
+              <Plus className="mr-2 h-4 w-4" /> New Project
+            </Button>
+          </div>
+          
+          <div className="bg-white dark:bg-zinc-950 border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Project Name</TableHead>
+                  <TableHead>Phase</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Tasks</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {projects.map(p => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell><Badge variant="outline" className="capitalize">{p.phase}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={
+                        p.status === 'on_track' ? "bg-emerald-100 text-emerald-800" :
+                        p.status === 'at_risk' ? "bg-yellow-100 text-yellow-800" :
+                        p.status === 'delayed' ? "bg-red-100 text-red-800" :
+                        "bg-zinc-100 text-zinc-800"
+                      }>
+                        {p.status.replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{(p.tasks || []).length} tasks</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => router.push(`/projects/${p.id}`)}>View</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {projects.length === 0 && (
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-zinc-500">No projects found.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
