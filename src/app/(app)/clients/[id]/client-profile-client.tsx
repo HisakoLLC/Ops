@@ -491,13 +491,15 @@ export function ClientProfileClient({
                                 <Download className="mr-2 h-4 w-4" />
                                 Download
                             </Button>
-                            <SendDocumentButton
-                              documentId={doc.id}
-                              clientEmail={client.contact_email || ""}
-                              clientName={client.contact_name || client.company_name}
-                              docLabel={doc.doc_label}
-                              docType={doc.doc_type}
-                            />
+                            {!["discovery_script", "intake_questionnaire", "onboarding_checklist"].includes(doc.doc_type) && (
+                              <SendDocumentButton
+                                documentId={doc.id}
+                                clientEmail={client.contact_email || ""}
+                                clientName={client.contact_name || client.company_name}
+                                docLabel={doc.doc_label}
+                                docType={doc.doc_type}
+                              />
+                            )}
                           </>
                         ) : (
                           <Button variant="secondary" size="sm" className="flex-1" disabled>
