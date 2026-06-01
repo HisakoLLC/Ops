@@ -67,9 +67,11 @@ export default async function KBArticlePage({ params }: { params: Promise<{ slug
           </div>
         </div>
         {isAdmin && (
-          <Button variant="outline" asChild>
-            <Link href={`/kb/article/${article.slug}/edit`}><Edit className="h-4 w-4 mr-2" /> Edit</Link>
-          </Button>
+          <Link href={`/kb/article/${article.slug}/edit`}>
+            <Button variant="outline">
+              <Edit className="h-4 w-4 mr-2" /> Edit
+            </Button>
+          </Link>
         )}
       </div>
 
@@ -82,11 +84,11 @@ export default async function KBArticlePage({ params }: { params: Promise<{ slug
       <div className="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center text-sm text-zinc-500">
         <div>Was this article helpful?</div>
         {isAdmin && (
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/kb/article/${article.slug}/edit`} className="text-zinc-500 hover:text-zinc-900">
+          <Link href={`/kb/article/${article.slug}/edit`} className="text-zinc-500 hover:text-zinc-900">
+            <Button variant="ghost" size="sm" className="pointer-events-none">
               <Edit className="h-4 w-4 mr-2" /> Edit this article
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         )}
       </div>
     </div>

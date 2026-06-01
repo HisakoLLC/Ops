@@ -20,9 +20,11 @@ export function KBHomeClient({ articles, search, stats, isAdmin }: { articles: a
           <p className="text-zinc-500">Internal SOPs, processes, and documentation.</p>
         </div>
         {isAdmin && (
-          <Button className="bg-[#E8400C] text-white hover:bg-[#E8400C]/90" asChild>
-            <Link href="/kb/new"><FileText className="mr-2 h-4 w-4" /> New Article</Link>
-          </Button>
+          <Link href="/kb/new">
+            <Button className="bg-[#E8400C] text-white hover:bg-[#E8400C]/90">
+              <FileText className="mr-2 h-4 w-4" /> New Article
+            </Button>
+          </Link>
         )}
       </div>
 

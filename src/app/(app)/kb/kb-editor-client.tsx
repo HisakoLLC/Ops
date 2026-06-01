@@ -95,9 +95,11 @@ export function KBEditorClient({ article, categories, currentUserId }: { article
     <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
       <div className="flex-shrink-0 border-b p-4 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={article ? `/kb/article/${article.slug}` : "/kb"}><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
+          <Link href={article ? `/kb/article/${article.slug}` : "/kb"}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
           <h1 className="font-semibold">{article ? 'Edit Article' : 'New Article'}</h1>
         </div>
         <div className="flex items-center gap-2">
