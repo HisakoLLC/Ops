@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SendInvoiceButton from "@/components/SendInvoiceButton";
+import SendReminderButton from "@/components/SendReminderButton";
 import {
   Table,
   TableBody,
@@ -249,12 +250,6 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
     }
   };
 
-  const handleSendReminder = (invoice: InvoiceWithClient) => {
-    const text = `Hi ${invoice.clients?.company_name || 'there'},\n\nJust a quick reminder that invoice ${invoice.invoice_ref} for ${formatUSD(invoice.amount)} was due on ${invoice.due_date}. Please let us know if you have any questions.\n\nBest,\nHisako Ops`;
-    navigator.clipboard.writeText(text);
-    toast.success("Reminder text copied to clipboard");
-  };
-
   const [invoiceTab, setInvoiceTab] = useState("all");
   const filteredInvoices = invoices.filter(inv => {
     if (invoiceTab === "all") return true;
@@ -398,7 +393,16 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
                             />
                           )}
                           {(inv.status === 'sent' || inv.status === 'overdue') && <Button size="sm" variant="ghost" className="text-emerald-600" onClick={() => handleUpdateInvoiceStatus(inv.id, 'paid', inv.client_id)}>Mark Paid</Button>}
-                          {inv.status === 'overdue' && <Button size="sm" variant="ghost" className="text-red-500" onClick={() => handleSendReminder(inv)}><Bell className="h-4 w-4" /></Button>}
+                          {inv.status === 'overdue' && (
+                            <SendReminderButton 
+                              invoiceId={inv.id} 
+                              clientEmail={inv.clients?.contact_email || ''} 
+                              invoiceRef={inv.invoice_ref || 'Draft'} 
+                              dueDate={inv.due_date ? format(new Date(inv.due_date), "MMM d, yyyy") : undefined}
+                              clientName={inv.clients?.company_name || 'Client'}
+                              amount={formatUSD(inv.amount)} 
+                            />
+                          )}
                           <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
                             <Button size="sm" variant="ghost" type="button">
                               <Download className="h-4 w-4" />

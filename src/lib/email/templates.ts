@@ -212,6 +212,7 @@ export function invoiceEmail(data: {
   dueDate: string
   invoiceType: string
   senderName?: string
+  isReminder?: boolean
 }) {
   const typeLabel = {
     deposit: '50% Deposit — Commencement of Work',
@@ -219,6 +220,11 @@ export function invoiceEmail(data: {
     retainer: 'Monthly Retainer',
     adhoc: 'Invoice',
   }[data.invoiceType] || 'Invoice'
+
+  const headline = data.isReminder ? 'Payment Reminder.' : `${typeLabel}.`
+  const introText = data.isReminder 
+    ? `Just a quick reminder that invoice ${data.invoiceRef} was due on ${data.dueDate || 'receipt'}. Please let us know if you have any questions or if payment has already been made.`
+    : `Please find the invoice details below. ${data.dueDate ? `Payment is due ${data.dueDate}.` : 'Payment is due upon receipt.'}`
 
   return `
     <!DOCTYPE html>
@@ -229,10 +235,10 @@ export function invoiceEmail(data: {
         <div class="card">
           ${emailHeader()}
           <div class="body">
-            <div class="label">Invoice</div>
-            <h1 class="headline">${typeLabel}.</h1>
+            <div class="label">${data.isReminder ? 'Reminder' : 'Invoice'}</div>
+            <h1 class="headline">${headline}</h1>
             <p class="text">Hi ${data.clientName || 'Client'},</p>
-            <p class="text">Please find the invoice details below. ${data.dueDate ? `Payment is due ${data.dueDate}.` : 'Payment is due upon receipt.'}</p>
+            <p class="text">${introText}</p>
             <hr class="rule">
             <table class="meta-table">
               <tr>

@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
     html = onboardingEmail({ ...templateData, senderName })
 
   } else if (type === 'invoice') {
-    subject = `Invoice ${templateData.invoiceRef} — Hisako Technologies`
+    subject = templateData.isReminder ? `Reminder: Invoice ${templateData.invoiceRef} — Hisako Technologies` : `Invoice ${templateData.invoiceRef} — Hisako Technologies`
     html = invoiceEmail({ ...templateData, senderName })
 
     // Generate invoice PDF on the fly
