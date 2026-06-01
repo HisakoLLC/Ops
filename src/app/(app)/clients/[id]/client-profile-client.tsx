@@ -253,14 +253,14 @@ export function ClientProfileClient({
               Edit Client
             </Button>
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button size="sm" className="bg-[#E8400C] hover:bg-[#E8400C]/90 text-white" />}>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-[#E8400C] hover:bg-[#E8400C]/90 text-white">
                   <FileText className="mr-2 h-4 w-4" />
                   Generate Document
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 {DOC_TYPES.map((doc) => (
-                  <DropdownMenuItem key={doc.key} render={<Link href={`/clients/${client.id}/docs/new/${doc.key}`} className="cursor-pointer" />}>
-                    {doc.label}
+                  <DropdownMenuItem key={doc.key}>
+                    <Link href={`/clients/${client.id}/docs/new/${doc.key}`} className="w-full cursor-pointer">{doc.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -635,14 +635,14 @@ export function ClientProfileClient({
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold">Generated Documents</h2>
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button className="bg-[#E8400C] hover:bg-[#E8400C]/90 text-white" />}>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2 disabled:pointer-events-none disabled:opacity-50 bg-[#E8400C] hover:bg-[#E8400C]/90 text-white">
                   <FileText className="mr-2 h-4 w-4" />
                   Generate Document
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 {DOC_TYPES.map((doc) => (
-                  <DropdownMenuItem key={doc.key} render={<Link href={`/clients/${client.id}/docs/new/${doc.key}`} className="cursor-pointer" />}>
-                    {doc.label}
+                  <DropdownMenuItem key={doc.key}>
+                    <Link href={`/clients/${client.id}/docs/new/${doc.key}`} className="w-full cursor-pointer">{doc.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -690,17 +690,17 @@ export function ClientProfileClient({
                           <>
                             {["proposal", "nda", "services_agreement", "monthly_report"].includes(doc.doc_type) ? (
                               <DropdownMenu>
-                                <DropdownMenuTrigger render={<Button variant="default" size="sm" className="flex-1" />}>
+                                <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 flex-1">
                                     <Download className="mr-2 h-4 w-4" />
                                     Download
                                     <ChevronDown className="ml-1.5 h-4 w-4 opacity-75" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="start" className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-1 rounded-md shadow-md w-44 z-50">
-                                  <DropdownMenuItem render={<a href={`/api/documents/download?id=${doc.id}&format=pdf`} target="_blank" rel="noreferrer" className="flex w-full items-center px-2 py-1.5 text-sm outline-none cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded" />}>
-                                    Download PDF
+                                  <DropdownMenuItem>
+                                    <a href={`/api/documents/download?id=${doc.id}&format=pdf`} target="_blank" rel="noreferrer" className="flex w-full items-center text-sm outline-none cursor-pointer">Download PDF</a>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" className="flex w-full items-center px-2 py-1.5 text-sm outline-none cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded" />}>
-                                    {["nda", "services_agreement"].includes(doc.doc_type) ? "Editable (.docx)" : "Word Doc (.docx)"}
+                                  <DropdownMenuItem>
+                                    <a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" className="flex w-full items-center text-sm outline-none cursor-pointer">{["nda", "services_agreement"].includes(doc.doc_type) ? "Editable (.docx)" : "Word Doc (.docx)"}</a>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
