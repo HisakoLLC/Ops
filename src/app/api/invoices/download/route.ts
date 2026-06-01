@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     const docxBuffer = await Packer.toBuffer(doc);
 
     if (format === "docx") {
-      return new NextResponse(docxBuffer, {
+      return new NextResponse(new Uint8Array(docxBuffer), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.docx"`,
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
       const pdfArrayBuffer = await pdfResponse.arrayBuffer();
       const pdfBuffer = Buffer.from(pdfArrayBuffer);
 
-      return new NextResponse(pdfBuffer, {
+      return new NextResponse(new Uint8Array(pdfBuffer), {
         headers: {
           "Content-Type": "application/pdf",
           "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.pdf"`,
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
       });
     } catch (e) {
       console.error("Gotenberg failed, falling back to DOCX:", e);
-      return new NextResponse(docxBuffer, {
+      return new NextResponse(new Uint8Array(docxBuffer), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="${invoice.invoice_ref || 'invoice'}.docx"`,

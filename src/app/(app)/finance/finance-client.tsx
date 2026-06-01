@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-type InvoiceWithClient = Invoice & { clients: { company_name: string } | null };
+type InvoiceWithClient = Invoice & { clients: { company_name: string, contact_email?: string } | null };
 
 interface FinanceClientProps {
   clients: Client[];
@@ -182,7 +182,7 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
           ...invoiceForm,
           created_by: currentUserId
         }])
-        .select('*, clients(company_name)')
+        .select('*, clients(company_name, contact_email)')
         .single();
 
       if (error) throw error;

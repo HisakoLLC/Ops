@@ -38,7 +38,7 @@ export default async function FinancePage() {
   // Fetch invoices
   const { data: invoices } = await supabase
     .from("invoices")
-    .select("*, clients(company_name)")
+    .select("*, clients(company_name, contact_email)")
     .order("created_at", { ascending: false });
 
   // Fetch expenses
@@ -51,7 +51,7 @@ export default async function FinancePage() {
     <div className="mx-auto max-w-7xl">
       <FinanceClient 
         clients={(clients as Client[]) || []}
-        initialInvoices={(invoices as (Invoice & { clients: { company_name: string } })[]) || []}
+        initialInvoices={(invoices as (Invoice & { clients: { company_name: string, contact_email: string } })[]) || []}
         initialExpenses={(expenses as Expense[]) || []}
         currentUserId={session.user.id}
       />
