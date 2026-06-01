@@ -104,7 +104,7 @@ export function ProjectsClient({ initialProjects, clients }: { initialProjects: 
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || 'all')}>
           <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-950">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -116,7 +116,7 @@ export function ProjectsClient({ initialProjects, clients }: { initialProjects: 
             <SelectItem value="complete">Complete</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={phaseFilter} onValueChange={setPhaseFilter}>
+        <Select value={phaseFilter} onValueChange={(v) => setPhaseFilter(v || 'all')}>
           <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-950">
             <SelectValue placeholder="Phase" />
           </SelectTrigger>
