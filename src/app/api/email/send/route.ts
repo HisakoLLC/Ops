@@ -58,16 +58,68 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    const { data: fileData } = await serviceClient.storage
-      .from('hisako-documents')
-      .download(doc.storage_path)
 
-    if (fileData) {
-      const buffer = Buffer.from(await fileData.arrayBuffer())
-      attachments = [{
-        filename: `${docLabel.replace(/\s+/g, '-')}_Hisako.docx`,
-        content: buffer,
-      }]
+    const isClientFacing = ['proposal', 'nda', 'services_agreement', 'monthly_report'].includes(doc.doc_type)
+    const needsSigning = ['nda', 'services_agreement'].includes(doc.doc_type)
+
+    if (isClientFacing) {
+      const pdfStoragePath = doc.storage_path.replace(/\.docx$/, '.pdf')
+      
+      // Download PDF
+      const { data: pdfFileData } = await serviceClient.storage
+        .from('hisako-documents')
+        .download(pdfStoragePath)
+
+      if (pdfFileData) {
+        const pdfBuffer = Buffer.from(await pdfFileData.arrayBuffer())
+        attachments.push({
+          filename: `${docLabel.replace(/\s+/g, '-')}_Hisako.pdf`,
+          content: pdfBuffer,
+        })
+      }
+
+      // Download DOCX if it needs signing
+      if (needsSigning) {
+        const { data: docxFileData } = await serviceClient.storage
+          .from('hisako-documents')
+          .download(doc.storage_path)
+
+        if (docxFileData) {
+          const docxBuffer = Buffer.from(await docxFileData.arrayBuffer())
+          attachments.push({
+            filename: `${docLabel.replace(/\s+/g, '-')}_editable_version.docx`,
+            content: docxBuffer,
+          })
+        }
+      }
+
+      // Fallback to DOCX if PDF download failed
+      if (attachments.length === 0) {
+        const { data: docxFileData } = await serviceClient.storage
+          .from('hisako-documents')
+          .download(doc.storage_path)
+
+        if (docxFileData) {
+          const docxBuffer = Buffer.from(await docxFileData.arrayBuffer())
+          attachments.push({
+            filename: `${docLabel.replace(/\s+/g, '-')}_Hisako.docx`,
+            content: docxBuffer,
+          })
+        }
+      }
+    } else {
+      // Non-client facing, or default: just attach DOCX
+      const { data: docxFileData } = await serviceClient.storage
+        .from('hisako-documents')
+        .download(doc.storage_path)
+
+      if (docxFileData) {
+        const docxBuffer = Buffer.from(await docxFileData.arrayBuffer())
+        attachments = [{
+          filename: `${docLabel.replace(/\s+/g, '-')}_Hisako.docx`,
+          content: docxBuffer,
+        }]
+      }
     }
 
     // Log activity on client

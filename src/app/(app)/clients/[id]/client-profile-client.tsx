@@ -487,10 +487,25 @@ export function ClientProfileClient({
                       <div className="flex flex-wrap gap-2">
                         {doc.storage_path ? (
                           <>
-                            <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}`} target="_blank" rel="noreferrer" />}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Download
-                            </Button>
+                            {["proposal", "nda", "services_agreement", "monthly_report"].includes(doc.doc_type) ? (
+                              <>
+                                <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}&format=pdf`} target="_blank" rel="noreferrer" />}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Download PDF
+                                </Button>
+                                {["nda", "services_agreement"].includes(doc.doc_type) && (
+                                  <Button variant="outline" size="sm" render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" />}>
+                                      <Download className="mr-2 h-4 w-4" />
+                                      Editable (.docx)
+                                  </Button>
+                                )}
+                              </>
+                            ) : (
+                              <Button variant="default" size="sm" className="flex-1" render={<a href={`/api/documents/download?id=${doc.id}&format=docx`} target="_blank" rel="noreferrer" />}>
+                                  <Download className="mr-2 h-4 w-4" />
+                                  Download (.docx)
+                              </Button>
+                            )}
                             {!["discovery_script", "intake_questionnaire", "onboarding_checklist"].includes(doc.doc_type) && (
                               <SendDocumentButton
                                 documentId={doc.id}

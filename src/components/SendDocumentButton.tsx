@@ -93,7 +93,11 @@ export default function SendDocumentButton({
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              The document will be attached as a .docx file.
+              {['nda', 'services_agreement'].includes(docType)
+                ? "The document will be attached as a PDF (alongside editable .docx version)."
+                : ['proposal', 'monthly_report'].includes(docType)
+                ? "The document will be attached as a PDF."
+                : "The document will be attached as a .docx file."}{" "}
               Sent from alerts@notify.hisako.eu
             </p>
           </div>

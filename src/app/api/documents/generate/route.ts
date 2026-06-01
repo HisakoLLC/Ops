@@ -69,6 +69,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Storage failed" }, { status: 500 });
     }
 
+    // Convert to PDF and upload as well
+    try {
+      const formDataBody = new FormData();
+      formDataBody.append("files", new Blob([new Uint8Array(buffer)]), "document.docx");
+      const pdfResponse = await fetch("https://demo.gotenberg.dev/forms/libreoffice/convert", {
+        method: "POST",
+        body: formDataBody,
+      });
+
+      if (pdfResponse.ok) {
+        const pdfArrayBuffer = await pdfResponse.arrayBuffer();
+        const pdfBuffer = Buffer.from(pdfArrayBuffer);
+        const pdfStoragePath = storagePath.replace(/\.docx$/, ".pdf");
+
+        const { error: pdfUploadError } = await serviceClient.storage
+          .from("hisako-documents")
+          .upload(pdfStoragePath, pdfBuffer, {
+            contentType: "application/pdf",
+            upsert: true,
+          });
+
+        if (pdfUploadError) {
+          console.error("PDF upload error:", pdfUploadError);
+        }
+      } else {
+        console.error("Gotenberg PDF conversion failed status:", pdfResponse.statusText);
+      }
+    } catch (pdfErr) {
+      console.error("Gotenberg PDF conversion failed:", pdfErr);
+    }
+
     // Save/update document record
     const docRecord = {
       client_id: clientId,
