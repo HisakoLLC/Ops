@@ -470,11 +470,12 @@ export function ClientProfileClient({
                   <th className="px-4 py-3 font-medium">Amount</th>
                   <th className="px-4 py-3 font-medium">Due Date</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {initialInvoices.length === 0 ? (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-zinc-500">No invoices generated yet.</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-zinc-500">No invoices generated yet.</td></tr>
                 ) : (
                   initialInvoices.map(inv => (
                     <tr key={inv.id}>
@@ -485,6 +486,13 @@ export function ClientProfileClient({
                         <Badge variant="outline" className={inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : inv.status === 'overdue' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-zinc-100 text-zinc-600'}>
                           {inv.status}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="ghost" asChild>
+                          <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </Button>
                       </td>
                     </tr>
                   ))

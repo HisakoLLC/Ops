@@ -18,5 +18,6 @@ export const DOC_TYPES = [
   { key: 'nda', label: 'NDA', description: 'Non-disclosure agreement' },
   { key: 'onboarding_checklist', label: 'Onboarding Checklist', description: 'Client onboarding steps and tool access' },
   { key: 'pipeline_handover', label: 'Pipeline Handover', description: 'Technical documentation for delivered pipelines' },
-  { key: 'monthly_report', label: 'Monthly Report', description: 'Performance and value metrics report' }
+  { key: 'monthly_report', label: 'Monthly Report', description: 'Performance and value metrics report' },
+  { key: 'invoice', label: 'Invoice', description: 'Standard billing invoice' }
 ] as const;

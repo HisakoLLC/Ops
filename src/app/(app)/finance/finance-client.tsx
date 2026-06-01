@@ -386,7 +386,11 @@ export function FinanceClient({ clients, initialInvoices, initialExpenses, curre
                           {inv.status === 'draft' && <Button size="sm" variant="ghost" onClick={() => handleUpdateInvoiceStatus(inv.id, 'sent')}>Send</Button>}
                           {(inv.status === 'sent' || inv.status === 'overdue') && <Button size="sm" variant="ghost" className="text-emerald-600" onClick={() => handleUpdateInvoiceStatus(inv.id, 'paid', inv.client_id)}>Mark Paid</Button>}
                           {inv.status === 'overdue' && <Button size="sm" variant="ghost" className="text-red-500" onClick={() => handleSendReminder(inv)}><Bell className="h-4 w-4" /></Button>}
-                          {inv.status === 'paid' && <Button size="sm" variant="ghost"><Download className="h-4 w-4" /></Button>}
+                          <Button size="sm" variant="ghost" asChild>
+                            <a href={`/api/invoices/download?id=${inv.id}&format=pdf`} target="_blank" rel="noreferrer">
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
