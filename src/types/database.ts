@@ -78,3 +78,22 @@ export interface TeamInvite {
   accepted: boolean;
   created_at: string;
 }
+
+export interface Lead {
+  id: string;
+  company_name: string;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_linkedin: string | null;
+  source: 'outbound' | 'referral' | 'inbound' | 'event' | 'other';
+  industry: string | null;
+  estimated_value: number | null;
+  status: 'new' | 'contacted' | 'responded' | 'qualified' | 'converted' | 'dead';
+  notes: string | null;
+  follow_up_date: string | null;
+  assigned_to: string | null;
+  converted_to: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}

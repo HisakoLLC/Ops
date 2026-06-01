@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch } from "lucide-react";
 import { useUser } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
+  { href: "/leads", label: "Leads", icon: UserSearch, adminOnly: false },
   { href: "/clients", label: "Clients", icon: Users, adminOnly: false },
   { href: "/pipeline", label: "Pipeline", icon: Kanban, adminOnly: false },
   { href: "/team", label: "Team", icon: Users2, adminOnly: true },

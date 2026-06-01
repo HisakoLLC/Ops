@@ -13,8 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const routeNames: Record<string, string> = {
+const ROUTE_MAP: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/leads": "Leads",
   "/clients": "Clients",
   "/pipeline": "Pipeline",
   "/team": "Team",
@@ -27,7 +28,7 @@ export function TopBar() {
 
   // Basic logic to get title from pathname
   let pageTitle = "Hisako Ops";
-  for (const [route, name] of Object.entries(routeNames)) {
+  for (const [route, name] of Object.entries(ROUTE_MAP)) {
     if (pathname.startsWith(route)) {
       pageTitle = name;
       break;
