@@ -38,7 +38,7 @@ create policy "Public Access" on storage.objects for select
   using (bucket_id = 'docs-media');
 
 create policy "Auth Insert" on storage.objects for insert
-  using (auth.role()='authenticated' and bucket_id = 'docs-media');
+  with check (auth.role()='authenticated' and bucket_id = 'docs-media');
 
 create policy "Auth Update" on storage.objects for update
   using (auth.role()='authenticated' and bucket_id = 'docs-media');
