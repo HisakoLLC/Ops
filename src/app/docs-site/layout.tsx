@@ -1,0 +1,32 @@
+import Link from 'next/link'
+import { BookOpen } from 'lucide-react'
+
+export default function DocsSiteLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background flex flex-col font-sans">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto max-w-6xl flex h-14 items-center px-4">
+          <div className="mr-4 flex">
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+              <BookOpen className="h-6 w-6" />
+              <span className="font-bold sm:inline-block">Hisako Docs</span>
+            </Link>
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+              <Link href="/article" className="transition-colors hover:text-foreground/80 text-foreground/60">Articles</Link>
+              <Link href="/project_doc" className="transition-colors hover:text-foreground/80 text-foreground/60">Projects</Link>
+              <Link href="/product_doc" className="transition-colors hover:text-foreground/80 text-foreground/60">Products</Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+      <main className="flex-1">
+        {children}
+      </main>
+      <footer className="border-t py-6 md:py-0">
+        <div className="container mx-auto max-w-6xl flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row px-4 text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} Hisako EU. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
