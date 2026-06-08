@@ -22,7 +22,8 @@ export default function NewDocPage() {
     
     const formData = new FormData(e.currentTarget)
     const title = formData.get('title') as string
-    const slug = formData.get('slug') as string
+    const rawSlug = formData.get('slug') as string
+    const slug = rawSlug ? rawSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : ''
     const type = formData.get('type') as string
 
     if (!title || !slug || !type) {
