@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BookOpen } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Hisako Docs',
+  description: 'Official documentation, project write-ups, and insights from Hisako EU.',
+}
 
 export default function DocsSiteLayout({ children }: { children: React.ReactNode }) {
   return (
