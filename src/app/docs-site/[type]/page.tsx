@@ -39,7 +39,7 @@ export default async function DocsTypePage({ params }: { params: Promise<{ type:
 
   const { data: articles } = await supabase
     .from('docs_articles')
-    .select('*, profiles:created_by(full_name)')
+    .select('*, profiles!docs_articles_created_by_fkey(full_name)')
     .eq('is_published', true)
     .eq('type', type)
     .order('published_at', { ascending: false })

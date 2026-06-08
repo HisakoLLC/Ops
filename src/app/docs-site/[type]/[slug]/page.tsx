@@ -20,7 +20,7 @@ export default async function DocViewPage({ params }: { params: Promise<{ type: 
 
   const { data: doc } = await supabase
     .from('docs_articles')
-    .select('*, profiles:created_by(full_name)')
+    .select('*, profiles!docs_articles_created_by_fkey(full_name, avatar_url)')
     .eq('is_published', true)
     .eq('type', type)
     .eq('slug', slug)
@@ -40,7 +40,11 @@ export default async function DocViewPage({ params }: { params: Promise<{ type: 
         
         <div className="flex items-center space-x-4 text-muted-foreground border-b pb-8">
           <div className="flex items-center">
-            <User className="h-4 w-4 mr-2" />
+            {doc.profiles?.avatar_url ? (
+              <img src={doc.profiles.avatar_url} alt={doc.profiles.full_name || 'Author'} className="h-6 w-6 rounded-full mr-2 object-cover border" />
+            ) : (
+              <User className="h-4 w-4 mr-2" />
+            )}
             {doc.profiles?.full_name || 'Anonymous'}
           </div>
           <div>•</div>

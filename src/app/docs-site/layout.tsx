@@ -11,16 +11,16 @@ export default function DocsSiteLayout({ children }: { children: React.ReactNode
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto max-w-6xl flex h-14 items-center px-4">
-          <div className="mr-4 flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
+        <div className="container mx-auto max-w-6xl flex h-16 items-center px-4 justify-between">
+          <div className="flex items-center">
+            <Link href="/" className="mr-10 flex items-center space-x-2">
               <BookOpen className="h-6 w-6" />
-              <span className="font-bold sm:inline-block">Hisako Docs</span>
+              <span className="font-bold sm:inline-block text-lg">Hisako Docs</span>
             </Link>
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link href="/article" className="transition-colors hover:text-foreground/80 text-foreground/60">Articles</Link>
-              <Link href="/project_doc" className="transition-colors hover:text-foreground/80 text-foreground/60">Projects</Link>
-              <Link href="/product_doc" className="transition-colors hover:text-foreground/80 text-foreground/60">Products</Link>
+            <nav className="flex items-center space-x-8 text-base font-medium">
+              <Link href="/article" className="transition-colors hover:text-foreground/80 text-foreground/60 py-2">Articles</Link>
+              <Link href="/project_doc" className="transition-colors hover:text-foreground/80 text-foreground/60 py-2">Projects</Link>
+              <Link href="/product_doc" className="transition-colors hover:text-foreground/80 text-foreground/60 py-2">Products</Link>
             </nav>
           </div>
         </div>
