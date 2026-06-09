@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.hisako.eu"
+        }
+      ],
+      "destination": "/docs-site/:path*"
+    }
+  ]
+}

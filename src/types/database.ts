@@ -236,3 +236,64 @@ export interface KBArticle {
   created_at: string;
   updated_at: string;
 }
+
+export interface Doc {
+  id: string
+  content_type: 'article' | 'project' | 'product_doc'
+  status: 'draft' | 'published' | 'archived'
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string
+  cover_image_url: string | null
+  tags: string[]
+  reading_time_minutes: number | null
+  author_id: string | null
+  author_name_override: string | null
+  published_at: string | null
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  updated_by: string | null
+  featured: boolean
+  project_industry: string | null
+  project_tools: string[] | null
+  project_outcome: string | null
+  project_client_name: string | null
+  project_anonymous: boolean
+  product_id: string | null
+  section_id: string | null
+  sort_order: number
+  seo_title: string | null
+  seo_description: string | null
+}
+
+export interface DocProduct {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  logo_url: string | null
+  version: string
+  sort_order: number
+}
+
+export interface DocSection {
+  id: string
+  product_id: string
+  name: string
+  slug: string
+  sort_order: number
+}
+
+export interface DocComment {
+  id: string
+  doc_id: string
+  parent_id: string | null
+  author_name: string
+  author_email: string
+  content: string
+  approved: boolean
+  created_at: string
+}
+

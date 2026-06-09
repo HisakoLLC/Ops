@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PIPELINE_STAGES } from "@/lib/constants";
 import Link from "next/link";
 import { formatDistanceToNow, startOfMonth } from "date-fns";
-import { StickyNote, Phone, Mail, Calendar, ArrowRight, FileText, DollarSign, Users, CheckCircle2 } from "lucide-react";
+import { StickyNote, Phone, Mail, Calendar, ArrowRight, FileText, DollarSign, Users, CheckCircle2, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -135,6 +135,15 @@ export default async function DashboardPage() {
     .eq("date", new Date().toISOString().split('T')[0]);
 
   const hoursLoggedToday = myTimeToday?.reduce((acc, curr) => acc + Number(curr.hours), 0) || 0;
+
+  // TASK 6: Recent Docs
+  const { data: recentDocs } = await supabase
+    .from("docs")
+    .select("id, title, content_type, status, updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(5);
+
+  const hasDocs = (recentDocs?.length || 0) > 0;
 
   const formatUSD = (val: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
@@ -349,6 +358,58 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* TASK 6: Recent Docs */}
+      {hasDocs && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Docs</CardTitle>
+            <Link 
+              href="/docs/new" 
+              className="flex items-center gap-1 text-sm font-medium text-[#E8400C] hover:text-[#c4360a] transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              New Doc
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {recentDocs && recentDocs.length > 0 ? (
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {recentDocs.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-4 w-4 text-zinc-400" />
+                      <div>
+                        <Link 
+                          href={`/docs/${doc.id}/edit`}
+                          className="text-sm font-medium hover:text-[#E8400C] transition-colors"
+                        >
+                          {doc.title}
+                        </Link>
+                        <div className="text-xs text-zinc-500 capitalize mt-0.5">
+                          {doc.content_type.replace('_', ' ')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded border ${
+                        doc.status === 'published' ? 'border-green-200 bg-green-50 text-green-700' :
+                        doc.status === 'draft' ? 'border-zinc-200 bg-zinc-50 text-zinc-700' :
+                        'border-zinc-200 bg-zinc-100 text-zinc-500'
+                      }`}>
+                        {doc.status}
+                      </div>
+                      <div className="text-xs text-zinc-500 w-24 text-right">
+                        {formatDistanceToNow(new Date(doc.updated_at), { addSuffix: true })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
