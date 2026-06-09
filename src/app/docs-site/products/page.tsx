@@ -21,7 +21,7 @@ export default async function ProductsPage() {
         </Link>
         <h1 className="text-4xl font-bold tracking-tight mb-4">Products</h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
-          Official documentation for Hisako's tools, frameworks, and client products.
+          Official documentation for Hisako&apos;s tools, frameworks, and client products.
         </p>
       </div>
 

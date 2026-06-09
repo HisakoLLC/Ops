@@ -66,7 +66,7 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
     if (!initialDoc && title && !slug) {
       setSlug(title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''))
     }
-  }, [title, initialDoc])
+  }, [title, initialDoc, slug])
 
   const handleSave = async (publishStatus?: string) => {
     setIsSaving(true)
