@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock, BookOpen, PanelLeftClose, PanelLeftOpen, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock, BookOpen, PanelLeftClose, PanelLeftOpen, FileText, FolderOpen } from "lucide-react";
 import { useUser } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,7 @@ const navItems = [
   { href: "/kb", label: "Knowledge Base", icon: BookOpen, adminOnly: false },
   { href: "/docs", label: "All Docs", icon: BookOpen, adminOnly: false },
   { href: "/docs/new", label: "New Doc", icon: FileText, adminOnly: false },
+  { href: "/files", label: "Files & Assets", icon: FolderOpen, adminOnly: false },
   { href: "/settings", label: "Settings", icon: Settings, adminOnly: false },
 ];
 
