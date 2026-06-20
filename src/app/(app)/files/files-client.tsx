@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -94,13 +94,13 @@ export function FilesClient({ initialFiles }: { initialFiles: any[] }) {
           <p className="text-muted-foreground">Upload and manage documents and screenshots.</p>
         </div>
         <div>
-          <label htmlFor="file-upload">
-            <Button asChild disabled={isUploading} className="cursor-pointer">
-              <span>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                {isUploading ? "Uploading..." : "Upload File"}
-              </span>
-            </Button>
+          <label 
+            htmlFor="file-upload" 
+            className={buttonVariants({ className: "cursor-pointer" })}
+            style={{ opacity: isUploading ? 0.5 : 1, pointerEvents: isUploading ? 'none' : 'auto' }}
+          >
+            <UploadCloud className="mr-2 h-4 w-4" />
+            {isUploading ? "Uploading..." : "Upload File"}
           </label>
           <input
             id="file-upload"
@@ -147,11 +147,15 @@ export function FilesClient({ initialFiles }: { initialFiles: any[] }) {
                   <TableCell>{formatSize(file.size_bytes)}</TableCell>
                   <TableCell>{new Date(file.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={file.file_url} target="_blank" rel="noreferrer" download={file.file_name}>
-                        <Download className="h-4 w-4" />
-                      </a>
-                    </Button>
+                    <a 
+                      href={file.file_url} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      download={file.file_name}
+                      className={buttonVariants({ variant: "outline", size: "sm" })}
+                    >
+                      <Download className="h-4 w-4" />
+                    </a>
                     <Button variant="outline" size="sm" onClick={() => handleDelete(file.id, file.file_url)}>
                       <Trash className="h-4 w-4 text-red-500" />
                     </Button>
