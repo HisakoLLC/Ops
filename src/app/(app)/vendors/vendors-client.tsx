@@ -70,13 +70,28 @@ export function VendorsClient({ initialVendors, clients }: { initialVendors: any
     }
     
     try {
+      const { clients: _clients, id: _id, created_at: _created_at, updated_at: _updated_at, ...rest } = vendorForm as any;
+      const payload = {
+        ...rest,
+        client_id: rest.is_client_tool ? (rest.client_id || null) : null,
+      };
+
       if (editingVendor) {
-        const { error } = await supabase.from('vendors').update(vendorForm).eq('id', editingVendor.id);
+        const { data, error } = await supabase
+          .from('vendors')
+          .update(payload)
+          .eq('id', editingVendor.id)
+          .select('*, clients(company_name, contact_email)')
+          .single();
         if (error) throw error;
         toast.success("Vendor updated");
-        setVendors(vendors.map(v => v.id === editingVendor.id ? { ...v, ...vendorForm } : v));
+        setVendors(vendors.map(v => v.id === editingVendor.id ? (data || { ...v, ...payload }) : v));
       } else {
-        const { data, error } = await supabase.from('vendors').insert([vendorForm]).select('*, clients(company_name, contact_email)').single();
+        const { data, error } = await supabase
+          .from('vendors')
+          .insert([payload])
+          .select('*, clients(company_name, contact_email)')
+          .single();
         if (error) throw error;
         toast.success("Vendor added");
         setVendors([data, ...vendors]);
