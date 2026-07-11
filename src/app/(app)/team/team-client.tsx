@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { Plus, UserMinus, Mail, Trash2 } from "lucide-react";
+import { Plus, UserMinus, Mail, Trash2, KeyRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -90,11 +90,38 @@ export function TeamClient({ initialMembers, initialInvites, currentUserId }: an
 
   const handleRemoveMember = async (id: string) => {
     if (id === currentUserId) return;
-    if (!confirm("Are you sure you want to remove this member?")) return;
+    if (!confirm("Are you sure you want to remove this member? This action cannot be undone.")) return;
     
-    // In a real app, we'd use Supabase Admin API to delete the user or disable login.
-    // For now, we'll just remove their profile or set a disabled flag.
-    toast.error("Full member deletion requires Supabase backend configuration. This is a placeholder.");
+    try {
+      const response = await fetch(`/api/team/member/${id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to remove member");
+      
+      toast.success("Member removed successfully");
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleSendResetPassword = async (id: string, email?: string) => {
+    if (!confirm(`Send password reset email to ${email || "this member"}?`)) return;
+
+    try {
+      const response = await fetch(`/api/team/member/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset_password" }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to send reset email");
+
+      toast.success(result.message || "Password reset email sent");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -188,10 +215,21 @@ export function TeamClient({ initialMembers, initialInvites, currentUserId }: an
                   <TableCell className="text-sm text-zinc-500">
                     {format(new Date(member.created_at), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Send Password Reset Email"
+                      onClick={() => handleSendResetPassword(member.id, member.email)}
+                      disabled={member.id === currentUserId}
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
+                      title="Remove Member"
                       onClick={() => handleRemoveMember(member.id)}
                       disabled={member.id === currentUserId}
                       className={member.id !== currentUserId ? "text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" : ""}
