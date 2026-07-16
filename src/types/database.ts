@@ -266,6 +266,7 @@ export interface Doc {
   sort_order: number
   seo_title: string | null
   seo_description: string | null
+  category_id?: string | null
 }
 
 export interface DocProduct {
@@ -296,4 +297,22 @@ export interface DocComment {
   approved: boolean
   created_at: string
 }
+
+export interface Media {
+  id: string
+  filename: string
+  original_filename: string
+  storage_path: string
+  public_url: string
+  mime_type: string
+  size_bytes: number
+  width: number | null
+  height: number | null
+  alt_text: string
+  folder: string
+  uploaded_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 

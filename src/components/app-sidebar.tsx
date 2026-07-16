@@ -3,32 +3,38 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock, BookOpen, PanelLeftClose, PanelLeftOpen, FileText, FolderOpen } from "lucide-react";
+import { LayoutDashboard, Users, Kanban, Users2, Settings, LogOut, UserSearch, DollarSign, Database, Briefcase, Clock, BookOpen, PanelLeftClose, PanelLeftOpen, FileText, FolderOpen, Image as ImageIcon, Tags, FolderTree, Mail } from "lucide-react";
 import { useUser } from "@/lib/auth-context";
+import { useRole } from "@/lib/use-role";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
-  { href: "/leads", label: "Leads", icon: UserSearch, adminOnly: false },
-  { href: "/clients", label: "Clients", icon: Users, adminOnly: false },
-  { href: "/projects", label: "Projects", icon: Briefcase, adminOnly: false },
-  { href: "/pipeline", label: "Pipeline", icon: Kanban, adminOnly: false },
-  { href: "/time", label: "Time", icon: Clock, adminOnly: false },
-  { href: "/finance", label: "Finance", icon: DollarSign, adminOnly: true },
-  { href: "/vendors", label: "Vendors", icon: Database, adminOnly: false },
-  { href: "/team", label: "Team", icon: Users2, adminOnly: true },
-  { href: "/kb", label: "Knowledge Base", icon: BookOpen, adminOnly: false },
-  { href: "/docs", label: "All Docs", icon: BookOpen, adminOnly: false },
-  { href: "/docs/new", label: "New Doc", icon: FileText, adminOnly: false },
-  { href: "/files", label: "Files & Assets", icon: FolderOpen, adminOnly: false },
-  { href: "/settings", label: "Settings", icon: Settings, adminOnly: false },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ['admin', 'editor', 'writer', 'member', 'viewer'] },
+  { href: "/leads", label: "Leads", icon: UserSearch, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/clients", label: "Clients", icon: Users, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/projects", label: "Projects", icon: Briefcase, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/pipeline", label: "Pipeline", icon: Kanban, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/time", label: "Time", icon: Clock, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/finance", label: "Finance", icon: DollarSign, roles: ['admin'] },
+  { href: "/vendors", label: "Vendors", icon: Database, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/team", label: "Team", icon: Users2, roles: ['admin'] },
+  { href: "/kb", label: "Knowledge Base", icon: BookOpen, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/docs", label: "All Docs", icon: BookOpen, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/docs/new", label: "New Doc", icon: FileText, roles: ['admin', 'editor', 'writer', 'member'] },
+  { href: "/cms/media", label: "Media Library", icon: ImageIcon, roles: ['admin', 'editor', 'writer'] },
+  { href: "/cms/categories", label: "Categories", icon: FolderOpen, roles: ['admin', 'editor'] },
+  { href: "/cms/tags", label: "Tags", icon: Tags, roles: ['admin', 'editor'] },
+  { href: "/cms/navigation", label: "Navigation", icon: FolderTree, roles: ['admin', 'editor'] },
+  { href: "/cms/forms", label: "Forms", icon: Mail, roles: ['admin', 'editor'] },
+  { href: "/settings", label: "Settings", icon: Settings, roles: ['admin', 'editor', 'writer', 'member'] },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useUser();
+  const { role } = useRole();
   const supabase = createClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -67,7 +73,7 @@ export function AppSidebar() {
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="flex flex-col space-y-1 px-3">
           {navItems.map((item) => {
-            if (item.adminOnly && profile?.role !== "admin") return null;
+            if (!item.roles.includes(role || 'viewer')) return null;
 
             const isActive = pathname.startsWith(item.href);
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import { PublicComments } from '@/components/docs/PublicComments'
+import { FeedbackForm } from '@/components/docs-site/FeedbackForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,6 +88,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
       )}
+
+      <div className="mt-12">
+        <FeedbackForm docTitle={article.title} docUrl={`https://docs.hisako.eu/articles/${article.slug}`} />
+      </div>
 
       <PublicComments docId={article.id} initialComments={comments || []} />
     </article>

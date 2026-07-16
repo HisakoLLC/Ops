@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MediaPicker } from '@/components/cms/MediaPicker'
 
 interface MarkdownEditorProps {
   value: string
@@ -109,6 +110,14 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
             </Button>
             <div className="w-px h-4 bg-border mx-1" />
             
+            <MediaPicker 
+              onSelect={(url, altText) => insertText(`![${altText || 'image'}](${url})`)}
+              trigger={
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-orange-500 hover:text-orange-600 dark:text-orange-400" title="Choose from Media Library">
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+              }
+            />
             <div className="relative">
               <Button type="button" variant="ghost" size="icon" className="h-8 w-8" disabled={isUploading} title="Upload Image">
                 {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}

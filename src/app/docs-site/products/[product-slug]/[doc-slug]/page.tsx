@@ -2,12 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { PublicComments } from '@/components/docs/PublicComments'
+import { FeedbackForm } from '@/components/docs-site/FeedbackForm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductDocPage({ params }: { params: Promise<{ 'product-slug': string, 'doc-slug': string }> }) {
   const supabase = await createClient()
-  const { 'doc-slug': docSlug } = await params
+  const { 'product-slug': productSlug, 'doc-slug': docSlug } = await params
 
   const { data: doc } = await supabase
     .from('docs')
@@ -47,6 +48,10 @@ export default async function ProductDocPage({ params }: { params: Promise<{ 'pr
         <pre className="whitespace-pre-wrap font-sans bg-transparent p-0 text-foreground">
           {doc.content}
         </pre>
+      </div>
+
+      <div className="mt-12">
+        <FeedbackForm docTitle={doc.title} docUrl={`https://docs.hisako.eu/products/${productSlug}/${docSlug}`} />
       </div>
 
       <PublicComments docId={doc.id} initialComments={comments || []} />

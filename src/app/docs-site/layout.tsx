@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { JetBrains_Mono } from 'next/font/google'
+import { createClient } from '@/lib/supabase/server'
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
@@ -14,7 +15,34 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://docs.hisako.eu'),
 }
 
-export default function DocsSiteLayout({ children }: { children: React.ReactNode }) {
+export default async function DocsSiteLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  
+  const { data: menuData } = await supabase
+    .from('nav_menus')
+    .select('id')
+    .eq('slug', 'docs-header')
+    .single()
+
+  let navItems: any[] = []
+  if (menuData) {
+    const { data: items } = await supabase
+      .from('nav_items')
+      .select('label, href, target, sort_order')
+      .eq('menu_id', menuData.id)
+      .order('sort_order', { ascending: true })
+    if (items) navItems = items
+  }
+
+  // Fallback if DB menu not seeded or empty
+  if (navItems.length === 0) {
+    navItems = [
+      { label: 'Articles', href: '/articles', target: '_self' },
+      { label: 'Projects', href: '/projects', target: '_self' },
+      { label: 'Products', href: '/products', target: '_self' },
+    ]
+  }
+
   return (
     <div className={`min-h-screen bg-background flex flex-col font-sans ${jetbrainsMono.variable}`}>
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14 border-b">
@@ -28,9 +56,16 @@ export default function DocsSiteLayout({ children }: { children: React.ReactNode
             </a>
           </div>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link href="/articles" className="transition-colors hover:text-[#E8400C] text-foreground/80">Articles</Link>
-            <Link href="/projects" className="transition-colors hover:text-[#E8400C] text-foreground/80">Projects</Link>
-            <Link href="/products" className="transition-colors hover:text-[#E8400C] text-foreground/80">Products</Link>
+            {navItems.map((item, index) => (
+              <Link
+                key={index}
+                href={item.href}
+                target={item.target || '_self'}
+                className="transition-colors hover:text-[#E8400C] text-foreground/80"
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
           <div className="flex items-center gap-4">
             <button className="text-muted-foreground hover:text-foreground">
@@ -49,9 +84,11 @@ export default function DocsSiteLayout({ children }: { children: React.ReactNode
         <div className="mx-auto max-w-6xl flex flex-col items-center justify-between gap-4 md:flex-row px-4 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} Hisako Technologies Limited. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link href="/articles" className="hover:text-foreground">Articles</Link>
-            <Link href="/projects" className="hover:text-foreground">Projects</Link>
-            <Link href="/products" className="hover:text-foreground">Products</Link>
+            {navItems.map((item, index) => (
+              <Link key={index} href={item.href} target={item.target || '_self'} className="hover:text-foreground">
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>

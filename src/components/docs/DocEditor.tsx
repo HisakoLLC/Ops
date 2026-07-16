@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -11,9 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ChevronLeft, Save, Eye, EyeOff, Plus, ExternalLink } from 'lucide-react'
+import { ChevronLeft, Save, Eye, EyeOff, Plus, ExternalLink, History } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { MediaPicker } from '@/components/cms/MediaPicker'
+import { useRole } from '@/lib/use-role'
+import { RevisionHistoryPanel } from '@/components/cms/RevisionHistoryPanel'
 
 interface DocEditorProps {
   initialDoc: any | null;
@@ -25,10 +28,12 @@ interface DocEditorProps {
 export function DocEditor({ initialDoc, products, sections, userProfile }: DocEditorProps) {
   const router = useRouter()
   const supabase = createClient()
+  const { canPublishDoc, canDeleteAnyDoc } = useRole()
   
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(initialDoc?.updated_at ? new Date(initialDoc.updated_at) : null)
   const [isPreview, setIsPreview] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
   // Form State
   const [title, setTitle] = useState(initialDoc?.title || '')
@@ -42,8 +47,15 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
   const [coverImageUrl, setCoverImageUrl] = useState(initialDoc?.cover_image_url || '')
   const [tags, setTags] = useState<string[]>(initialDoc?.tags || [])
   const [tagInput, setTagInput] = useState('')
+  const [categoryId, setCategoryId] = useState<string>(initialDoc?.category_id || '')
+  const [categories, setCategories] = useState<any[]>([])
   const [seoTitle, setSeoTitle] = useState(initialDoc?.seo_title || '')
   const [seoDescription, setSeoDescription] = useState(initialDoc?.seo_description || '')
+
+  useEffect(() => {
+    supabase.from('doc_categories').select('*').order('sort_order', { ascending: true })
+      .then(({ data }) => { if (data) setCategories(data) })
+  }, [])
 
   // Article specific
   const [featured, setFeatured] = useState(initialDoc?.featured || false)
@@ -79,6 +91,7 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
       content,
       content_type: contentType,
       status: currentStatus,
+      category_id: categoryId || null,
       cover_image_url: coverImageUrl,
       tags,
       seo_title: seoTitle,
@@ -152,6 +165,11 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {initialDoc?.id && (
+            <Button variant="outline" size="sm" onClick={() => setIsHistoryOpen(true)}>
+              <History className="h-4 w-4 mr-2" /> History
+            </Button>
+          )}
           {status === 'published' && (
             <Button variant="outline" size="sm" onClick={() => window.open(`https://docs.hisako.eu`, '_blank')}>
               <ExternalLink className="h-4 w-4 mr-2" /> View Live
@@ -160,9 +178,15 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
           <Button variant="outline" size="sm" onClick={() => handleSave('draft')} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" /> {isSaving ? 'Saving...' : 'Save Draft'}
           </Button>
-          <Button size="sm" className="bg-[#E8400C] hover:bg-[#c4360a] text-white" onClick={() => handleSave('published')} disabled={isSaving}>
-            {status === 'published' ? 'Update Live' : 'Publish'}
-          </Button>
+          {canPublishDoc ? (
+            <Button size="sm" className="bg-[#E8400C] hover:bg-[#c4360a] text-white" onClick={() => handleSave('published')} disabled={isSaving}>
+              {status === 'published' ? 'Update Live' : 'Publish'}
+            </Button>
+          ) : (
+            <Button size="sm" className="bg-[#E8400C] hover:bg-[#c4360a] text-white" onClick={() => handleSave('review')} disabled={isSaving}>
+              Submit for Review
+            </Button>
+          )}
         </div>
       </div>
 
@@ -269,6 +293,44 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
               </select>
             </div>
 
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Category</Label>
+                <Link href="/cms/categories" target="_blank" className="text-xs text-[#E8400C] hover:underline">
+                  + New Category
+                </Link>
+              </div>
+              <select
+                className="w-full flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+              >
+                <option value="">No Category</option>
+                {categories.filter(c => !c.parent_id).map(root => (
+                  <React.Fragment key={root.id}>
+                    <option value={root.id} className="font-semibold">{root.name}</option>
+                    {categories.filter(c => c.parent_id === root.id).map(child => (
+                      <option key={child.id} value={child.id}>&nbsp;&nbsp;↳ {child.name}</option>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Status</Label>
+              <select
+                className="w-full flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="draft">Draft</option>
+                <option value="review">Ready for Review</option>
+                {canPublishDoc && <option value="published">Published</option>}
+                {canPublishDoc && <option value="archived">Archived</option>}
+              </select>
+            </div>
+
             <div className="h-px bg-border w-full" />
 
             {/* Type Specific Fields */}
@@ -277,7 +339,25 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
                 <h3 className="font-semibold text-sm">Article Details</h3>
                 <div className="space-y-2">
                   <Label>Cover Image URL</Label>
-                  <Input value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)} placeholder="https://..." />
+                  <div className="flex gap-2">
+                    <Input value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)} placeholder="https://..." className="flex-1" />
+                    <MediaPicker 
+                      onSelect={(url) => setCoverImageUrl(url)}
+                      trigger={<Button type="button" variant="outline" size="sm" className="shrink-0">Choose</Button>}
+                    />
+                  </div>
+                  {coverImageUrl && (
+                    <div className="relative mt-2 aspect-video w-full rounded overflow-hidden border bg-muted">
+                      <img src={coverImageUrl} alt="Cover preview" className="w-full h-full object-cover" />
+                      <button 
+                        type="button" 
+                        onClick={() => setCoverImageUrl('')} 
+                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 text-xs hover:bg-black/80"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Tags</Label>
@@ -424,9 +504,49 @@ export function DocEditor({ initialDoc, products, sections, userProfile }: DocEd
               </>
             )}
 
+            {initialDoc?.id && (canDeleteAnyDoc || (initialDoc?.author_id === userProfile?.id && status === 'draft')) && (
+              <>
+                <div className="h-px bg-border w-full" />
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="w-full"
+                    onClick={async () => {
+                      if (!confirm('Are you sure you want to permanently delete this document?')) return;
+                      const { error } = await supabase.from('docs').delete().eq('id', initialDoc.id);
+                      if (error) {
+                        toast.error('Failed to delete: ' + error.message);
+                      } else {
+                        toast.success('Document deleted');
+                        router.push('/docs');
+                      }
+                    }}
+                  >
+                    Delete Document
+                  </Button>
+                </div>
+              </>
+            )}
+
           </div>
         </div>
       </div>
+
+      <RevisionHistoryPanel
+        docId={initialDoc?.id || null}
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        onRestored={(doc) => {
+          setTitle(doc.title)
+          setContent(doc.content)
+          setExcerpt(doc.excerpt || '')
+          setSlug(doc.slug || '')
+          setStatus(doc.status || 'draft')
+          if (doc.category_id !== undefined) setCategoryId(doc.category_id || '')
+          toast.success('Editor state updated to restored revision')
+        }}
+      />
     </div>
   )
 }
