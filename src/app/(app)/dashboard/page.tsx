@@ -145,6 +145,12 @@ export default async function DashboardPage() {
 
   const hasDocs = (recentDocs?.length || 0) > 0;
 
+  // TASK 7: AOE Pending Review Leads count
+  const { count: pendingAOELeadsCount } = await supabase
+    .from("aoe_leads")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "PENDING_REVIEW");
+
   const formatUSD = (val: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
   };
@@ -301,6 +307,30 @@ export default async function DashboardPage() {
               <div className="flex h-32 flex-col items-center justify-center space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
                 <span className="text-green-500">✓</span>
                 <span>All clients are up to date</span>
+              </div>
+            )}
+            {pendingAOELeadsCount !== null && pendingAOELeadsCount > 0 && (
+              <div className="mt-4 border-t border-zinc-250 pt-4 dark:border-zinc-800">
+                <Link
+                  href="/aoe-leads?status=PENDING_REVIEW"
+                  className="flex items-center justify-between rounded-lg border border-orange-200 bg-orange-50/50 p-4 transition-colors hover:bg-orange-100/50 dark:border-orange-900/30 dark:bg-orange-950/10 dark:hover:bg-orange-950/20"
+                >
+                  <div className="space-y-1">
+                    <div className="font-semibold text-sm text-orange-900 dark:text-orange-100 flex items-center gap-1.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                      </span>
+                      AOE Leads Pending Review
+                    </div>
+                    <div className="text-xs text-orange-700 dark:text-orange-300 font-medium">
+                      {pendingAOELeadsCount} leads waiting for review
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-1">
+                    Review now <ArrowRight className="h-3 w-3" />
+                  </div>
+                </Link>
               </div>
             )}
           </CardContent>

@@ -24,7 +24,8 @@ import {
   Tags,
   FolderTree,
   Mail,
-  ChevronDown
+  ChevronDown,
+  Zap
 } from "lucide-react";
 import { useUser } from "@/lib/auth-context";
 import { useRole } from "@/lib/use-role";
@@ -38,6 +39,7 @@ interface GroupItem {
   icon: React.ComponentType<{ className?: string }>;
   roles: string[];
   hasBadge?: boolean;
+  hasAOEBadge?: boolean;
 }
 
 interface Group {
@@ -58,6 +60,7 @@ const groups: Group[] = [
     title: "SALES",
     items: [
       { href: "/leads", label: "Leads", icon: UserSearch, roles: ['admin', 'editor', 'writer', 'member'] },
+      { href: "/aoe-leads", label: "AOE Leads", icon: Zap, roles: ['admin', 'editor', 'writer', 'member'], hasAOEBadge: true },
       { href: "/clients", label: "Clients", icon: Users, roles: ['admin', 'editor', 'writer', 'member'] },
       { href: "/pipeline", label: "Pipeline", icon: Kanban, roles: ['admin', 'editor', 'writer', 'member'] },
     ]
@@ -105,6 +108,7 @@ export function AppSidebar() {
   const supabase = createClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [newFormsCount, setNewFormsCount] = useState(0);
+  const [pendingAOELeadsCount, setPendingAOELeadsCount] = useState(0);
 
   useEffect(() => {
     async function fetchNewFormsCount() {
@@ -120,7 +124,23 @@ export function AppSidebar() {
         console.error("Error fetching form submissions count:", err);
       }
     }
+    
+    async function fetchPendingAOECount() {
+      try {
+        const { count, error } = await supabase
+          .from('aoe_leads')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'PENDING_REVIEW');
+        if (!error && count !== null) {
+          setPendingAOELeadsCount(count);
+        }
+      } catch (err) {
+        console.error("Error fetching pending AOE leads count:", err);
+      }
+    }
+
     fetchNewFormsCount();
+    fetchPendingAOECount();
   }, [supabase]);
 
   const handleSignOut = async () => {
@@ -248,8 +268,18 @@ export function AppSidebar() {
                         } ${isCollapsed ? "justify-center border-l-0" : "gap-3"}`}
                         title={isCollapsed ? item.label : undefined}
                       >
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                        {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
+                        <div className="relative flex items-center gap-3">
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
+                          {isCollapsed && item.hasAOEBadge && pendingAOELeadsCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-orange-500" />
+                          )}
+                        </div>
+                        {!isCollapsed && item.hasAOEBadge && pendingAOELeadsCount > 0 && (
+                          <span className="inline-flex items-center justify-center bg-orange-500 text-white rounded-full px-2 py-0.5 text-[10px] font-bold min-w-5 h-5 ml-auto">
+                            {pendingAOELeadsCount}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}

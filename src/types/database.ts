@@ -315,4 +315,65 @@ export interface Media {
   updated_at: string
 }
 
+export type AOELeadStatus =
+  | 'PENDING_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'EMAIL_1_SENT'
+  | 'EMAIL_2_SENT'
+  | 'EMAIL_3_SENT'
+  | 'REPLIED'
+  | 'CONVERTED'
+  | 'ARCHIVED'
+
+export type QualificationConfidence = 'HIGH' | 'MEDIUM' | 'LOW'
+
+export interface AOELead {
+  id: string
+  aoe_lead_id: string
+  aoe_draft_id: string
+  source: string
+  status: AOELeadStatus
+  contact_name: string | null
+  contact_title: string | null
+  contact_email: string | null
+  company_name: string | null
+  company_url: string | null
+  value_proposition: string | null
+  target_audience: string | null
+  scaling_signals: string | null
+  strategic_hook: string | null
+  primary_pain_point: string | null
+  qualification_confidence: QualificationConfidence | null
+  qualification_reason: string | null
+  tier_1_passed: boolean
+  tier_2_passed: boolean
+  email_1_subject_a: string | null
+  email_1_subject_b: string | null
+  email_1_body: string | null
+  email_2_subject_a: string | null
+  email_2_subject_b: string | null
+  email_2_body: string | null
+  email_3_subject_a: string | null
+  email_3_subject_b: string | null
+  email_3_body: string | null
+  selected_subject_1: string | null
+  selected_subject_2: string | null
+  selected_subject_3: string | null
+  edited_body_1: string | null
+  edited_body_2: string | null
+  edited_body_3: string | null
+  notes: string | null
+  reviewed_by: string | null
+  converted_to_client_id: string | null
+  sent_at_1: string | null
+  sent_at_2: string | null
+  sent_at_3: string | null
+  replied_at: string | null
+  ingested_at: string | null
+  drafted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 
