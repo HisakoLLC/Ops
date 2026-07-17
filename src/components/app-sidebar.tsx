@@ -80,8 +80,7 @@ const groups: Group[] = [
     title: "CMS",
     isCollapsible: true,
     items: [
-      { href: "/docs", label: "All Docs", icon: BookOpen, roles: ['admin', 'editor', 'writer', 'member'] },
-      { href: "/docs/new", label: "New Doc", icon: FileText, roles: ['admin', 'editor', 'writer', 'member'] },
+      { href: "/docs", label: "Hisako Docs", icon: BookOpen, roles: ['admin', 'editor', 'writer', 'member'] },
       { href: "/cms/media", label: "Media Library", icon: ImageIcon, roles: ['admin', 'editor', 'writer'] },
       { href: "/cms/categories", label: "Categories", icon: FolderOpen, roles: ['admin', 'editor'] },
       { href: "/cms/tags", label: "Tags", icon: Tags, roles: ['admin', 'editor'] },
