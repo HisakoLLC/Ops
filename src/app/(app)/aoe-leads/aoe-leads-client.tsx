@@ -395,7 +395,7 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">AOE Leads</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Outbound</h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
             Review and outreach sequence builder for Autonomous Outbound Engine prospects.
           </p>

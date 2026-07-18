@@ -60,7 +60,7 @@ const groups: Group[] = [
     title: "SALES",
     items: [
       { href: "/leads", label: "Leads", icon: UserSearch, roles: ['admin', 'editor', 'writer', 'member'] },
-      { href: "/aoe-leads", label: "AOE Leads", icon: Zap, roles: ['admin', 'editor', 'writer', 'member'], hasAOEBadge: true },
+      { href: "/aoe-leads", label: "Outbound", icon: Zap, roles: ['admin', 'editor', 'writer', 'member'], hasAOEBadge: true },
       { href: "/clients", label: "Clients", icon: Users, roles: ['admin', 'editor', 'writer', 'member'] },
       { href: "/pipeline", label: "Pipeline", icon: Kanban, roles: ['admin', 'editor', 'writer', 'member'] },
     ]
