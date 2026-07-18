@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, isBefore, isToday, parseISO } from "date-fns";
 import Papa from "papaparse";
-import { UserSearch, Search, Plus, Filter, Upload, Edit, Trash, ArrowRight, UserPlus } from "lucide-react";
+import { UserSearch, Search, Plus, Filter, Upload, Edit, Trash, ArrowRight, UserPlus, Zap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -96,6 +96,29 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
     pipeline_value: 0,
   });
   const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
+  const [scanningLeads, setScanningLeads] = useState<Record<string, boolean>>({});
+
+  const handleScanLead = async (leadId: string) => {
+    setScanningLeads((prev) => ({ ...prev, [leadId]: true }));
+    try {
+      const res = await fetch("/api/aoe/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to trigger scan");
+      }
+
+      toast.success(data.message || "Lead successfully queued in the AOE pipeline!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to scan lead with AOE");
+    } finally {
+      setScanningLeads((prev) => ({ ...prev, [leadId]: false }));
+    }
+  };
 
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = 
@@ -380,6 +403,19 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         {lead.status !== 'converted' && (
                           <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              disabled={scanningLeads[lead.id]}
+                              onClick={() => handleScanLead(lead.id)}
+                              title="Scan with AOE Outbound Builder"
+                            >
+                              {scanningLeads[lead.id] ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-[#E8400C]" />
+                              ) : (
+                                <Zap className="h-4 w-4 text-[#E8400C]" />
+                              )}
+                            </Button>
                             <Button size="sm" variant="ghost" onClick={() => {
                               setConvertForm({
                                 leadId: lead.id,
