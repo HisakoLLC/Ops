@@ -6,14 +6,18 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ingest:csv": "tsx scripts/ingest-csv.ts",
+    "test:pipeline": "tsx scripts/mock-runner.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@google/genai": "^2.12.0",
     "@hookform/resolvers": "^5.4.0",
+    "@mendable/firecrawl-js": "^4.30.1",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -25,6 +29,8 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
     "docx": "^9.7.1",
+    "dotenv": "^17.4.2",
+    "inngest": "^4.13.0",
     "lucide-react": "^1.17.0",
     "next": "15.5.14",
     "next-themes": "^0.4.6",
@@ -39,6 +45,7 @@
     "shadcn": "^4.8.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
+    "tsx": "^4.23.1",
     "tw-animate-css": "^1.4.0",
     "zod": "^4.4.3"
   },

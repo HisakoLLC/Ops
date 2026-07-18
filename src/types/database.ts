@@ -377,3 +377,82 @@ export interface AOELead {
 }
 
 
+// ── AOE Pipeline Types ─────────────────────────────────────────────────────
+
+export type LeadStatus =
+  | 'PENDING'
+  | 'ENRICHING'
+  | 'ENRICHED'
+  | 'QUALIFYING'
+  | 'QUALIFIED'
+  | 'DISQUALIFIED'
+  | 'DRAFTING'
+  | 'DRAFTED'
+  | 'PUSHED_TO_OPS';
+
+export interface AoePipelineLead {
+  id: string;
+  company_name: string;
+  company_url: string;
+  contact_email: string | null;
+  contact_name: string | null;
+  contact_title: string | null;
+  status: LeadStatus;
+  enrichment_data: Record<string, any> | null;
+  strategic_hook: string | null;
+  primary_pain_point: string | null;
+  disqualification_reason: string | null;
+  retry_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IcpConfig {
+  id: string;
+  target_industries: string[];
+  excluded_industries: string[];
+  min_employee_count: number | null;
+  max_employee_count: number | null;
+  target_geographies: string[];
+  excluded_keywords: string[];
+  icp_description: string | null;
+  service_framework: string | null;
+  updated_at: string;
+}
+
+export interface OutboundDraft {
+  id: string;
+  lead_id: string;
+  email_1_subject_a: string | null;
+  email_1_subject_b: string | null;
+  email_1_body: string | null;
+  email_2_subject_a: string | null;
+  email_2_subject_b: string | null;
+  email_2_body: string | null;
+  email_3_subject_a: string | null;
+  email_3_subject_b: string | null;
+  email_3_body: string | null;
+  delivery_status: 'STAGED' | 'PUSHED' | 'FAILED';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QualificationLog {
+  id: string;
+  lead_id: string;
+  tier: 1 | 2;
+  result: 'PASS' | 'FAIL';
+  reason: string | null;
+  llm_raw_response: Record<string, any> | null;
+  created_at: string;
+}
+
+export interface AoeErrorLog {
+  id: string;
+  lead_id: string | null;
+  worker: 'INGEST' | 'ENRICHMENT' | 'QUALIFICATION' | 'DRAFTING' | 'OPS_PUSH';
+  error_message: string;
+  error_payload: Record<string, any> | null;
+  resolved: boolean;
+  created_at: string;
+}
