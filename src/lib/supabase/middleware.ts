@@ -35,9 +35,11 @@ export async function updateSession(request: NextRequest) {
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/update-password')
+    !request.nextUrl.pathname.startsWith('/update-password') &&
+    !request.nextUrl.pathname.startsWith('/api/inngest') &&
+    !request.nextUrl.pathname.startsWith('/api/ingest')
   ) {
-    // no user — redirect to login unless it is a public auth route
+    // no user — redirect to login unless it is a public auth route or API endpoint
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
