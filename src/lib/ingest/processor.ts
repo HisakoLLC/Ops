@@ -36,6 +36,15 @@ export async function processLeads(leads: RawLeadInput[]): Promise<IngestSummary
     duplicates_skipped: 0,
   };
 
+  // Fetch active status of the pipeline
+  const { data: icp } = await supabase
+    .from('icp_config')
+    .select('is_active')
+    .limit(1)
+    .maybeSingle();
+
+  const isAoeActive = icp ? icp.is_active : true;
+
   for (const lead of leads) {
     const company_name = lead.company_name?.trim();
     const company_url = lead.company_url?.trim();
@@ -58,13 +67,14 @@ export async function processLeads(leads: RawLeadInput[]): Promise<IngestSummary
       contact_email: lead.contact_email?.trim() || null,
       contact_name: lead.contact_name?.trim() || null,
       contact_title: lead.contact_title?.trim() || null,
-      status: 'PENDING' as const,
+      status: (isAoeActive ? 'PENDING' : 'DISQUALIFIED') as any,
+      disqualification_reason: isAoeActive ? null : 'AOE pipeline is disabled in configurations',
     };
 
     const { data, error } = await supabase
       .from('aoe_pipeline_leads')
       .upsert(payload, { onConflict: 'company_url', ignoreDuplicates: true })
-      .select('id');
+      .select('id, status');
 
     if (error) {
       throw new Error(`Supabase upsert error for ${company_url}: ${error.message} (Code: ${error.code})`);
@@ -74,7 +84,9 @@ export async function processLeads(leads: RawLeadInput[]): Promise<IngestSummary
       const newLeadId = data[0].id;
       summary.inserted++;
 
-      await inngest.send(AOE_EVENTS.LEAD_INGESTED.create({ lead_id: newLeadId }));
+      if (data[0].status === 'PENDING') {
+        await inngest.send(AOE_EVENTS.LEAD_INGESTED.create({ lead_id: newLeadId }));
+      }
     } else {
       summary.duplicates_skipped++;
     }

@@ -11,9 +11,18 @@ export default async function AoeLeadsPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const { data: icpConfig } = await supabase
+    .from("icp_config")
+    .select("*")
+    .limit(1)
+    .maybeSingle();
+
   return (
     <div className="space-y-6">
-      <AoeLeadsClient initialLeads={leads || []} />
+      <AoeLeadsClient 
+        initialLeads={leads || []} 
+        initialIcpConfig={icpConfig}
+      />
     </div>
   );
 }

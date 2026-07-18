@@ -13,12 +13,16 @@ import {
   Mail,
   FileText,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Settings,
+  Save,
+  Play,
+  Pause
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { AOELead, AOELeadStatus, QualificationConfidence } from "@/types/database";
+import { AOELead, AOELeadStatus, QualificationConfidence, IcpConfig } from "@/types/database";
 import { createClient } from "@/lib/supabase/client";
 
 import { Button } from "@/components/ui/button";
@@ -50,12 +54,74 @@ import {
 
 interface AoeLeadsClientProps {
   initialLeads: AOELead[];
+  initialIcpConfig: IcpConfig | null;
 }
 
-export function AoeLeadsClient({ initialLeads }: AoeLeadsClientProps) {
+export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const [leads, setLeads] = useState<AOELead[]>(initialLeads);
+  
+  // Views Toggle Tab
+  const [activeView, setActiveView] = useState<'prospects' | 'settings'>('prospects');
+
+  // ICP Config states
+  const [icpConfig, setIcpConfig] = useState<IcpConfig | null>(initialIcpConfig);
+  const [isSavingIcp, setIsSavingIcp] = useState(false);
+
+  // Form fields for ICP
+  const [isActive, setIsActive] = useState<boolean>(initialIcpConfig?.is_active ?? true);
+  const [targetIndustries, setTargetIndustries] = useState<string>(
+    initialIcpConfig?.target_industries?.join(", ") ?? ""
+  );
+  const [excludedIndustries, setExcludedIndustries] = useState<string>(
+    initialIcpConfig?.excluded_industries?.join(", ") ?? ""
+  );
+  const [targetGeographies, setTargetGeographies] = useState<string>(
+    initialIcpConfig?.target_geographies?.join(", ") ?? ""
+  );
+  const [excludedKeywords, setExcludedKeywords] = useState<string>(
+    initialIcpConfig?.excluded_keywords?.join(", ") ?? ""
+  );
+  const [icpDescription, setIcpDescription] = useState<string>(
+    initialIcpConfig?.icp_description ?? ""
+  );
+  const [serviceFramework, setServiceFramework] = useState<string>(
+    initialIcpConfig?.service_framework ?? ""
+  );
+
+  const handleSaveIcp = async () => {
+    setIsSavingIcp(true);
+    try {
+      const payload = {
+        ...(icpConfig?.id ? { id: icpConfig.id } : {}),
+        is_active: isActive,
+        target_industries: targetIndustries.split(",").map(s => s.trim()).filter(Boolean),
+        excluded_industries: excludedIndustries.split(",").map(s => s.trim()).filter(Boolean),
+        target_geographies: targetGeographies.split(",").map(s => s.trim()).filter(Boolean),
+        excluded_keywords: excludedKeywords.split(",").map(s => s.trim()).filter(Boolean),
+        icp_description: icpDescription.trim() || null,
+        service_framework: serviceFramework.trim() || null,
+      };
+
+      const { data, error } = await supabase
+        .from('icp_config')
+        .upsert(payload)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setIcpConfig(data);
+      toast.success("ICP settings saved successfully!");
+    } catch (err: any) {
+      toast.error(`Failed to save settings: ${err.message}`);
+    } finally {
+      setIsSavingIcp(false);
+    }
+  };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [confidenceFilter, setConfidenceFilter] = useState<string>("all");
@@ -339,8 +405,36 @@ export function AoeLeadsClient({ initialLeads }: AoeLeadsClientProps) {
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Views Toggle Tab */}
+      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800">
+        <button
+          onClick={() => setActiveView('prospects')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors -mb-[2px] ${
+            activeView === 'prospects'
+              ? 'border-zinc-950 text-zinc-950 dark:border-zinc-50 dark:text-zinc-50'
+              : 'border-transparent text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+          }`}
+        >
+          <Zap className="h-3.5 w-3.5" />
+          Prospects Review Queue
+        </button>
+        <button
+          onClick={() => setActiveView('settings')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors -mb-[2px] ${
+            activeView === 'settings'
+              ? 'border-zinc-950 text-zinc-950 dark:border-zinc-50 dark:text-zinc-50'
+              : 'border-transparent text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+          }`}
+        >
+          <Settings className="h-3.5 w-3.5" />
+          ICP & Engine Settings
+        </button>
+      </div>
+
+      {activeView === 'prospects' && (
+        <>
+          {/* Stats Row */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Total Received</CardTitle>
@@ -595,6 +689,143 @@ export function AoeLeadsClient({ initialLeads }: AoeLeadsClientProps) {
           </TableBody>
         </Table>
       </div>
+        </>
+      )}
+
+      {activeView === 'settings' && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Main settings column */}
+          <div className="space-y-6 lg:col-span-2">
+            <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold">ICP Matching Criteria</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Target Industries</label>
+                    <Input 
+                      placeholder="e.g. SaaS, Tech, DevOps"
+                      value={targetIndustries}
+                      onChange={(e) => setTargetIndustries(e.target.value)}
+                    />
+                    <p className="text-[10px] text-zinc-400">Comma-separated list of target industries.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Excluded Industries</label>
+                    <Input 
+                      placeholder="e.g. Gaming, Retail"
+                      value={excludedIndustries}
+                      onChange={(e) => setExcludedIndustries(e.target.value)}
+                    />
+                    <p className="text-[10px] text-zinc-400">Industries to exclude during screening.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Target Geographies</label>
+                    <Input 
+                      placeholder="e.g. US, Europe, Canada"
+                      value={targetGeographies}
+                      onChange={(e) => setTargetGeographies(e.target.value)}
+                    />
+                    <p className="text-[10px] text-zinc-400">Target locations for qualification.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Excluded Keywords</label>
+                    <Input 
+                      placeholder="e.g. Crypto, Gambling"
+                      value={excludedKeywords}
+                      onChange={(e) => setExcludedKeywords(e.target.value)}
+                    />
+                    <p className="text-[10px] text-zinc-400">Exclude leads containing these keywords.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">ICP Description</label>
+                  <Textarea 
+                    rows={4}
+                    placeholder="Describe your ideal client profile..."
+                    value={icpDescription}
+                    onChange={(e) => setIcpDescription(e.target.value)}
+                  />
+                  <p className="text-[11px] text-zinc-400">Core parameters the LLM uses to score leads from 0 to 100.</p>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Service Pitch Framework</label>
+                  <Textarea 
+                    rows={4}
+                    placeholder="Describe your service framework..."
+                    value={serviceFramework}
+                    onChange={(e) => setServiceFramework(e.target.value)}
+                  />
+                  <p className="text-[11px] text-zinc-400">Your core services pitch used by Gemini to generate relevant outreach emails.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar status toggles */}
+          <div className="space-y-6">
+            <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold">Engine Activation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between border border-zinc-100 dark:border-zinc-900 rounded-lg p-4 bg-zinc-50/50 dark:bg-zinc-900/10">
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {isActive ? 'AOE Pipeline Active' : 'AOE Pipeline Paused'}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {isActive ? 'Pipeline is active and processing events.' : 'Leads will be marked as DISQUALIFIED upon ingest.'}
+                      </div>
+                    </div>
+                    <div>
+                      <Button
+                        type="button"
+                        variant={isActive ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => setIsActive(!isActive)}
+                        className="gap-2 text-xs"
+                      >
+                        {isActive ? (
+                          <>
+                            <Pause className="h-3.5 w-3.5" />
+                            Pause Engine
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-3.5 w-3.5" />
+                            Activate Engine
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-zinc-500 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-900 p-3.5 rounded-md leading-relaxed">
+                    💡 **How to trigger the AOE:** Send a CSV upload file or POST raw JSON leads to `/api/ingest/webhook` with the `X-Ingest-Secret` header set.
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-100 dark:border-zinc-900 pt-4 flex justify-end">
+                  <Button 
+                    type="button"
+                    onClick={handleSaveIcp} 
+                    disabled={isSavingIcp} 
+                    className="gap-2 bg-[#E8400C] hover:bg-[#E8400C]/90 text-white"
+                  >
+                    {isSavingIcp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Save Configurations
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* AOE Lead Details Sheet Panel */}
       <Sheet open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>

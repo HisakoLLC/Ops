@@ -51,6 +51,7 @@ create trigger aoe_pipeline_leads_updated_at
 -- Single-row table: Ideal Customer Profile. Workers pull this every run.
 create table if not exists public.icp_config (
   id                    uuid primary key default gen_random_uuid(),
+  is_active             boolean not null default true,
   target_industries     text[] default '{}'::text[],
   excluded_industries   text[] default '{}'::text[],
   min_employee_count    integer,

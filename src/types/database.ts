@@ -409,6 +409,7 @@ export interface AoePipelineLead {
 
 export interface IcpConfig {
   id: string;
+  is_active: boolean;
   target_industries: string[];
   excluded_industries: string[];
   min_employee_count: number | null;
