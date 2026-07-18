@@ -830,7 +830,7 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
 
       {/* AOE Lead Details Modal */}
       <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto p-0 gap-0 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl">
+        <DialogContent className="!w-[66vw] !max-w-[66vw] max-h-[90vh] overflow-y-auto p-0 gap-0 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl">
           {selectedLead && (
             <div className="flex flex-col">
               {/* Modal Header */}
