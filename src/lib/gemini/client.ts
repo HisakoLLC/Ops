@@ -17,7 +17,7 @@ const ai = new GoogleGenAI({
 export const geminiFlash = {
   generateContent: async (params: any) => {
     return ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents: params.contents,
       config: params.generationConfig,
     });
@@ -26,7 +26,7 @@ export const geminiFlash = {
 
 export async function generateJSON<T>(prompt: string): Promise<T> {
   const result = await ai.models.generateContent({
-    model: 'gemini-3.5-flash',
+    model: 'gemini-2.5-flash',
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     config: {
       responseMimeType: 'application/json',
