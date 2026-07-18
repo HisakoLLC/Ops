@@ -11,6 +11,50 @@ function getSupabase() {
   );
 }
 
+async function pushDisqualifiedToAoeLeads(supabase: any, lead: any, reason: string, tier: 1 | 2, confidence?: string) {
+  try {
+    const enrichmentData = (lead.enrichment_data || {}) as {
+      value_proposition?: string;
+      target_audience?: string;
+      scaling_signals?: string;
+    };
+    
+    const { error } = await supabase
+      .from('aoe_leads')
+      .upsert({
+        aoe_lead_id:              lead.id,
+        source:                   'AOE',
+        contact_name:             lead.contact_name,
+        contact_title:            lead.contact_title,
+        contact_email:            lead.contact_email,
+        company_name:             lead.company_name,
+        company_url:              lead.company_url,
+        value_proposition:        enrichmentData.value_proposition || null,
+        target_audience:          enrichmentData.target_audience || null,
+        scaling_signals:          enrichmentData.scaling_signals || null,
+        strategic_hook:           lead.strategic_hook || null,
+        primary_pain_point:       lead.primary_pain_point || null,
+        qualification_confidence: confidence || 'LOW',
+        qualification_reason:     reason,
+        tier_1_passed:            tier === 2,
+        tier_2_passed:            false,
+        ingested_at:              lead.created_at,
+        status:                   'REJECTED',
+      }, {
+        onConflict: 'aoe_lead_id',
+        ignoreDuplicates: false,
+      });
+
+    if (error) {
+      console.error(`[Qualification Worker] Failed to push disqualified lead: ${error.message}`);
+    } else {
+      console.log(`[Qualification Worker] Successfully pushed disqualified lead to aoe_leads table as REJECTED.`);
+    }
+  } catch (err: any) {
+    console.error(`[Qualification Worker] Error pushing disqualified lead: ${err.message}`);
+  }
+}
+
 export const qualificationWorker = inngest.createFunction(
   {
     id: 'aoe-qualification-worker',
@@ -191,6 +235,7 @@ export const qualificationWorker = inngest.createFunction(
 
     if (!tier1Result.passed) {
       console.log(`[Qualification Worker] Lead ${lead_id} disqualified at Tier 1: ${tier1Result.reason}`);
+      await pushDisqualifiedToAoeLeads(supabase, lead, tier1Result.reason!, 1);
       return { status: 'disqualified', tier: 1, reason: tier1Result.reason, lead_id };
     }
 
@@ -246,7 +291,7 @@ Return ONLY a JSON object:
             .update({ status: 'DISQUALIFIED', disqualification_reason: disqReason })
             .eq('id', lead_id);
 
-          return { qualified: false, reason: disqReason };
+          return { qualified: false, reason: disqReason, confidence: qualification.confidence };
         }
 
         await supabase.from('aoe_pipeline_leads').update({ status: 'QUALIFIED' }).eq('id', lead_id);
@@ -268,6 +313,7 @@ Return ONLY a JSON object:
 
     if (!tier2Result.qualified) {
       console.log(`[Qualification Worker] Lead ${lead_id} disqualified at Tier 2: ${tier2Result.reason}`);
+      await pushDisqualifiedToAoeLeads(supabase, lead, tier2Result.reason!, 2, (tier2Result as any).confidence);
       return { status: 'disqualified', tier: 2, reason: tier2Result.reason, lead_id };
     }
 
