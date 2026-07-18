@@ -70,6 +70,7 @@ const groups: Group[] = [
     items: [
       { href: "/projects", label: "Projects", icon: Briefcase, roles: ['admin', 'editor', 'writer', 'member'] },
       { href: "/time", label: "Time", icon: Clock, roles: ['admin', 'editor', 'writer', 'member'] },
+      { href: "/files", label: "Files", icon: FileText, roles: ['admin', 'editor', 'writer', 'member'] },
     ]
   },
   {
