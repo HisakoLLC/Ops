@@ -46,11 +46,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface AoeLeadsClientProps {
   initialLeads: AOELead[];
@@ -805,8 +805,9 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
                     </div>
                   </div>
 
-                  <div className="text-xs text-zinc-500 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-900 p-3.5 rounded-md leading-relaxed">
-                    💡 **How to trigger the AOE:** Send a CSV upload file or POST raw JSON leads to `/api/ingest/webhook` with the `X-Ingest-Secret` header set.
+                  <div className="text-xs text-zinc-500 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-3.5 rounded-md leading-relaxed space-y-1.5">
+                    <p className="font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">💡 How to trigger the AOE</p>
+                    <p>Go to the <span className="font-semibold text-zinc-800 dark:text-zinc-200">Leads</span> module and click the <span className="inline-flex items-center gap-1 font-semibold text-[#E8400C]">⚡ Zap</span> icon next to any lead to instantly scan and queue it through the engine.</p>
                   </div>
                 </div>
 
@@ -827,26 +828,26 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
         </div>
       )}
 
-      {/* AOE Lead Details Sheet Panel */}
-      <Sheet open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 space-y-6">
+      {/* AOE Lead Details Modal */}
+      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-0 gap-0 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl">
           {selectedLead && (
-            <>
-              {/* Sheet Header */}
-              <SheetHeader className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <SheetTitle className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                      {selectedLead.company_name}
-                    </SheetTitle>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      {getStatusBadge(selectedLead.status)}
-                      {getConfidenceBadge(selectedLead.qualification_confidence)}
-                    </div>
+            <div className="flex flex-col">
+              {/* Modal Header */}
+              <DialogHeader className="px-6 pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-950 z-10">
+                <div className="space-y-2">
+                  <DialogTitle className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                    {selectedLead.company_name}
+                  </DialogTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {getStatusBadge(selectedLead.status)}
+                    {getConfidenceBadge(selectedLead.qualification_confidence)}
                   </div>
                 </div>
-              </SheetHeader>
+              </DialogHeader>
 
+              {/* Scrollable content body */}
+              <div className="px-6 py-6 space-y-6">
               {/* SECTION 1: CONTACT INFO */}
               <div className="space-y-3">
                 <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 tracking-wider uppercase font-mono">
@@ -1305,10 +1306,11 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
                   )}
                 </div>
               </div>
-            </>
+              </div>
+            </div>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
