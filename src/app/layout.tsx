@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Hisako Ops",
+  title: "Zetafo Ops",
   description: "Internal CRM + Document Factory for Hisako Technologies Limited",
 };
 

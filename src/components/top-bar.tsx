@@ -28,7 +28,7 @@ export function TopBar() {
   const { profile } = useUser();
 
   // Basic logic to get title from pathname
-  let pageTitle = "Hisako Ops";
+  let pageTitle = "Zetafo Ops";
   for (const [route, name] of Object.entries(ROUTE_MAP)) {
     if (pathname.startsWith(route)) {
       pageTitle = name;

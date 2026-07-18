@@ -165,10 +165,16 @@ export function AppSidebar() {
       <div className={`flex h-14 items-center border-b border-zinc-200 dark:border-zinc-800 ${isCollapsed ? "justify-center" : "px-6 justify-between"}`}>
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-zinc-900 text-xs font-bold text-white dark:bg-zinc-100 dark:text-zinc-900">
-              H
+            <div className="flex h-6 w-6 items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" className="h-6 w-6 dark:invert">
+                <polygon points="42.8 66.5 75 12.8 9.9 12.8"/>
+                <polygon points="107.2 66.3 140 12.8 75 12.8"/>
+                <polygon points="42.8 83.7 10 137.2 75 137.2"/>
+                <polygon points="107.2 83.7 75.2 137.2 140 137.2"/>
+                <polygon points="63.1 53.9 50.7 74.5 63.1 94.3 87.1 94.3 99.3 74.4 86.9 53.9"/>
+              </svg>
             </div>
-            <span className="font-semibold tracking-tight text-sm whitespace-nowrap">Hisako Ops</span>
+            <span className="font-semibold tracking-tight text-sm whitespace-nowrap">Zetafo Ops</span>
           </div>
         )}
         <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
