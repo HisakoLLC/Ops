@@ -97,20 +97,19 @@ export const enrichmentWorker = inngest.createFunction(
 
         return scrapeResult.markdown as string;
       } catch (err: any) {
+        // Log the failure but do not crash the worker. Fallback to general intelligence.
         await supabase.from('error_logs').insert({
           lead_id,
           worker: 'ENRICHMENT',
-          error_message: `Step 2 (scrape-company-site) failed: ${err.message || String(err)}`,
+          error_message: `Step 2 (scrape-company-site) failed, using general knowledge fallback: ${err.message || String(err)}`,
           error_payload: { url: lead.company_url, error: String(err) },
-          resolved: false,
+          resolved: true,
         });
 
-        await supabase
-          .from('aoe_pipeline_leads')
-          .update({ status: 'PENDING', retry_count: (lead.retry_count || 0) + 1 })
-          .eq('id', lead_id);
-
-        throw err;
+        console.warn(`[Enrichment Worker] Firecrawl failed for ${lead.company_url}: ${err.message}. Using fallback.`);
+        return `Company Name: ${lead.company_name}
+Website: ${lead.company_url}
+Note: Scraper failed to fetch site content. Rely on general pre-trained knowledge about this company and its industry to qualify and draft outreach copy.`;
       }
     });
 
