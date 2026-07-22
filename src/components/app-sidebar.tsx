@@ -142,6 +142,17 @@ export function AppSidebar() {
 
     fetchNewFormsCount();
     fetchPendingAOECount();
+
+    const channel = supabase
+      .channel('sidebar-realtime-counts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'form_submissions' }, fetchNewFormsCount)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'aoe_leads' }, fetchPendingAOECount)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'aoe_pipeline_leads' }, fetchPendingAOECount)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [supabase]);
 
   const handleSignOut = async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDistanceToNow, subDays } from "date-fns";
 import Link from "next/link";
 import {
@@ -61,6 +61,45 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
   const router = useRouter();
   const supabase = createClient();
   const [leads, setLeads] = useState<AOELead[]>(initialLeads);
+
+  // Selected lead for detail sheet panel
+  const [selectedLead, setSelectedLead] = useState<AOELead | null>(null);
+
+  // Realtime subscription for live updates without page refresh
+  useEffect(() => {
+    const channel = supabase
+      .channel('aoe-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'aoe_leads' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newLead = payload.new as AOELead;
+            setLeads((prev) => [newLead, ...prev.filter((l) => l.id !== newLead.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedLead = payload.new as AOELead;
+            setLeads((prev) => prev.map((l) => (l.id === updatedLead.id ? updatedLead : l)));
+            if (selectedLead?.id === updatedLead.id) {
+              setSelectedLead(updatedLead);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setLeads((prev) => prev.filter((l) => l.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'aoe_pipeline_leads' },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, router, selectedLead?.id]);
   
   // Views Toggle Tab
   const [activeView, setActiveView] = useState<'prospects' | 'settings'>('prospects');
@@ -126,9 +165,6 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [confidenceFilter, setConfidenceFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
-  
-  // Selected lead for detail sheet panel
-  const [selectedLead, setSelectedLead] = useState<AOELead | null>(null);
   
   // Button loading states
   const [isSendingEmail, setIsSendingEmail] = useState<Record<number, boolean>>({});

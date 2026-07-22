@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, isBefore, isToday, parseISO } from "date-fns";
 import Papa from "papaparse";
 import { UserSearch, Search, Plus, Filter, Upload, Edit, Trash, ArrowRight, UserPlus, Zap, Loader2 } from "lucide-react";
@@ -78,6 +78,101 @@ export function LeadListClient({ initialLeads, profiles, currentUserId, initialA
   const [aoeStatusMap, setAoeStatusMap] = useState<Record<string, { status: string; label: string; reason?: string | null }>>(
     initialAoeStatusMap || {}
   );
+
+  // Realtime subscription for live status changes without refreshing
+  useEffect(() => {
+    const channel = supabase
+      .channel('crm-leads-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newLead = payload.new as Lead;
+            setLeads((prev) => [newLead, ...prev.filter((l) => l.id !== newLead.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedLead = payload.new as Lead;
+            setLeads((prev) => prev.map((l) => (l.id === updatedLead.id ? updatedLead : l)));
+          } else if (payload.eventType === 'DELETE') {
+            setLeads((prev) => prev.filter((l) => l.id !== payload.old.id));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'aoe_pipeline_leads' },
+        (payload) => {
+          const item = payload.new as any;
+          if (!item) return;
+
+          const st = item.status;
+          let label = st ? st.replace(/_/g, ' ') : '';
+          let status = st;
+
+          if (st === 'PENDING') { status = 'PENDING'; label = 'Queued'; }
+          else if (['ENRICHING', 'ENRICHED'].includes(st)) { status = 'ENRICHING'; label = 'Enriching'; }
+          else if (st === 'QUALIFYING') { status = 'QUALIFYING'; label = 'Qualifying'; }
+          else if (st === 'QUALIFIED') { status = 'QUALIFIED'; label = 'Qualified'; }
+          else if (['DRAFTING', 'DRAFTED'].includes(st)) { status = 'DRAFTING'; label = 'Drafting'; }
+          else if (st === 'DISQUALIFIED') { status = 'DISQUALIFIED'; label = 'Disqualified'; }
+          else if (st === 'PUSHED_TO_OPS') { status = 'PENDING_REVIEW'; label = 'Pending Review'; }
+
+          setLeads((currentLeads) => {
+            const match = currentLeads.find(
+              (l) =>
+                (item.contact_email && l.contact_email?.trim().toLowerCase() === item.contact_email.trim().toLowerCase()) ||
+                (item.company_name && l.company_name?.trim().toLowerCase() === item.company_name.trim().toLowerCase())
+            );
+            if (match) {
+              setAoeStatusMap((prev) => ({
+                ...prev,
+                [match.id]: { status, label, reason: item.disqualification_reason || prev[match.id]?.reason },
+              }));
+            }
+            return currentLeads;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'aoe_leads' },
+        (payload) => {
+          const item = payload.new as any;
+          if (!item) return;
+
+          const st = item.status;
+          let label = st ? st.replace(/_/g, ' ') : '';
+          let status = st;
+
+          if (st === 'PENDING_REVIEW') { status = 'PENDING_REVIEW'; label = 'Pending Review'; }
+          else if (st === 'APPROVED') { status = 'APPROVED'; label = 'Approved'; }
+          else if (['EMAIL_1_SENT', 'EMAIL_2_SENT', 'EMAIL_3_SENT'].includes(st)) { status = 'EMAIL_SENT'; label = 'Email Sent'; }
+          else if (st === 'REPLIED') { status = 'REPLIED'; label = 'Replied'; }
+          else if (st === 'CONVERTED') { status = 'CONVERTED'; label = 'Converted'; }
+          else if (['REJECTED', 'DISQUALIFIED'].includes(st)) { status = 'DISQUALIFIED'; label = 'Disqualified'; }
+
+          setLeads((currentLeads) => {
+            const match = currentLeads.find(
+              (l) =>
+                (item.contact_email && l.contact_email?.trim().toLowerCase() === item.contact_email.trim().toLowerCase()) ||
+                (item.company_name && l.company_name?.trim().toLowerCase() === item.company_name.trim().toLowerCase())
+            );
+            if (match) {
+              setAoeStatusMap((prev) => ({
+                ...prev,
+                [match.id]: { status, label, reason: item.qualification_reason || prev[match.id]?.reason },
+              }));
+            }
+            return currentLeads;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
   
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
