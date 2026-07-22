@@ -31,7 +31,7 @@ export async function generateJSON<T>(prompt: string): Promise<T> {
     config: {
       responseMimeType: 'application/json',
       temperature: 0.3,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 8192,
     },
   });
 
