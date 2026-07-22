@@ -320,6 +320,8 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
     if (statusFilter !== "all") {
       if (statusFilter === "SENT") {
         matchesStatus = ["EMAIL_1_SENT", "EMAIL_2_SENT", "EMAIL_3_SENT"].includes(lead.status);
+      } else if (statusFilter === "DISQUALIFIED") {
+        matchesStatus = ["DISQUALIFIED", "REJECTED"].includes(lead.status);
       } else {
         matchesStatus = lead.status === statusFilter;
       }
@@ -371,6 +373,8 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
         return <Badge variant="outline" className="text-zinc-500 border-zinc-200 dark:border-zinc-800">Pending Review</Badge>;
       case "APPROVED":
         return <Badge className="bg-sky-500 text-white border-0">Approved</Badge>;
+      case "DISQUALIFIED":
+        return <Badge variant="destructive" className="bg-rose-600 hover:bg-rose-700 text-white border-0">Disqualified</Badge>;
       case "REJECTED":
         return <Badge variant="destructive">Rejected</Badge>;
       case "EMAIL_1_SENT":
@@ -480,6 +484,7 @@ export function AoeLeadsClient({ initialLeads, initialIcpConfig }: AoeLeadsClien
             { value: "SENT", label: "Sent" },
             { value: "REPLIED", label: "Replied" },
             { value: "CONVERTED", label: "Converted" },
+            { value: "DISQUALIFIED", label: "Disqualified" },
             { value: "ARCHIVED", label: "Archived" },
             { value: "REJECTED", label: "Rejected" },
           ].map((tab) => {

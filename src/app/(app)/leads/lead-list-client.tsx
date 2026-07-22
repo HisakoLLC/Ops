@@ -51,6 +51,7 @@ interface LeadListClientProps {
   initialLeads: Lead[];
   profiles: Profile[];
   currentUserId: string;
+  initialAoeStatusMap?: Record<string, { status: string; label: string; reason?: string | null }>;
 }
 
 const LEAD_SOURCES = [
@@ -70,13 +71,17 @@ const LEAD_STATUSES = [
   { value: "dead", label: "Dead", color: "bg-zinc-500" },
 ];
 
-export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadListClientProps) {
+export function LeadListClient({ initialLeads, profiles, currentUserId, initialAoeStatusMap }: LeadListClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const [aoeStatusMap, setAoeStatusMap] = useState<Record<string, { status: string; label: string; reason?: string | null }>>(
+    initialAoeStatusMap || {}
+  );
   
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [aoeFilter, setAoeFilter] = useState<string>("all");
   
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -100,6 +105,10 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
 
   const handleScanLead = async (leadId: string) => {
     setScanningLeads((prev) => ({ ...prev, [leadId]: true }));
+    setAoeStatusMap((prev) => ({
+      ...prev,
+      [leadId]: { status: 'PENDING', label: 'Queued' }
+    }));
     try {
       const res = await fetch("/api/aoe/scan", {
         method: "POST",
@@ -128,8 +137,69 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
     
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    const aoeInfo = aoeStatusMap[lead.id];
+    let matchesAoe = true;
+    if (aoeFilter !== 'all') {
+      if (aoeFilter === 'NOT_SCANNED') {
+        matchesAoe = !aoeInfo || aoeInfo.status === 'NOT_SCANNED';
+      } else if (aoeFilter === 'DISQUALIFIED') {
+        matchesAoe = aoeInfo?.status === 'DISQUALIFIED' || aoeInfo?.status === 'REJECTED';
+      } else if (aoeFilter === 'PROCESSING') {
+        matchesAoe = ['PENDING', 'ENRICHING', 'QUALIFYING', 'QUALIFIED', 'DRAFTING'].includes(aoeInfo?.status || '');
+      } else {
+        matchesAoe = aoeInfo?.status === aoeFilter;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesAoe;
   });
+
+  const renderAoeStatusBadge = (aoeInfo?: { status: string; label: string; reason?: string | null }) => {
+    if (!aoeInfo || aoeInfo.status === "NOT_SCANNED") {
+      return (
+        <Badge variant="outline" className="text-zinc-400 border-zinc-200 dark:border-zinc-800 font-normal">
+          Not Scanned
+        </Badge>
+      );
+    }
+
+    const { status, label, reason } = aoeInfo;
+
+    switch (status) {
+      case "DISQUALIFIED":
+      case "REJECTED":
+        return (
+          <Badge variant="destructive" className="bg-rose-600 hover:bg-rose-700 text-white border-0" title={reason || "Disqualified by AI"}>
+            Disqualified
+          </Badge>
+        );
+      case "PENDING_REVIEW":
+        return <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0">Pending Review</Badge>;
+      case "APPROVED":
+        return <Badge className="bg-sky-500 hover:bg-sky-600 text-white border-0">Approved</Badge>;
+      case "EMAIL_SENT":
+      case "EMAIL_1_SENT":
+      case "EMAIL_2_SENT":
+      case "EMAIL_3_SENT":
+        return <Badge className="bg-sky-600 hover:bg-sky-700 text-white border-0">Email Sent</Badge>;
+      case "REPLIED":
+        return <Badge className="bg-teal-500 hover:bg-teal-600 text-white border-0">Replied</Badge>;
+      case "CONVERTED":
+        return <Badge className="bg-green-500 hover:bg-green-600 text-white border-0">Converted</Badge>;
+      case "PENDING":
+        return <Badge className="bg-blue-500 hover:bg-blue-600 text-white border-0">Queued</Badge>;
+      case "ENRICHING":
+      case "QUALIFYING":
+      case "DRAFTING":
+        return (
+          <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0">
+            {label}
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">{label}</Badge>;
+    }
+  };
 
   const stats = {
     total: leads.length,
@@ -338,7 +408,7 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
           />
         </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "all")}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[170px]">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <SelectValue placeholder="All Statuses" />
@@ -349,6 +419,25 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
             {LEAD_STATUSES.map(s => (
               <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={aoeFilter} onValueChange={(v) => setAoeFilter(v || "all")}>
+          <SelectTrigger className="w-[180px]">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-[#E8400C]" />
+              <SelectValue placeholder="All AOE States" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All AOE States</SelectItem>
+            <SelectItem value="NOT_SCANNED">Not Scanned</SelectItem>
+            <SelectItem value="DISQUALIFIED">Disqualified</SelectItem>
+            <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+            <SelectItem value="EMAIL_SENT">Email Sent</SelectItem>
+            <SelectItem value="REPLIED">Replied</SelectItem>
+            <SelectItem value="CONVERTED">Converted</SelectItem>
+            <SelectItem value="PROCESSING">Processing / Queued</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -362,6 +451,7 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
               <TableHead>Source</TableHead>
               <TableHead>Est. Value</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>AOE State</TableHead>
               <TableHead>Follow-up</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -369,7 +459,7 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
           <TableBody>
             {filteredLeads.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-zinc-500">
+                <TableCell colSpan={8} className="h-32 text-center text-zinc-500">
                   No leads found
                 </TableCell>
               </TableRow>
@@ -396,6 +486,9 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
                       <TableCell>{formatUSD(lead.estimated_value)}</TableCell>
                       <TableCell>
                         <Badge className={`${statusObj?.color} text-white border-transparent`}>{statusObj?.label}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {renderAoeStatusBadge(aoeStatusMap[lead.id])}
                       </TableCell>
                       <TableCell className={`text-sm ${needsFollowUp ? 'text-red-500 font-medium' : 'text-zinc-500'}`}>
                         {lead.follow_up_date ? format(parseISO(lead.follow_up_date), "MMM d, yyyy") : "-"}
@@ -438,7 +531,7 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
                     </TableRow>
                     {expandedLeadId === lead.id && (
                       <TableRow>
-                        <TableCell colSpan={7} className="bg-zinc-50/50 dark:bg-zinc-900/20 p-4">
+                        <TableCell colSpan={8} className="bg-zinc-50/50 dark:bg-zinc-900/20 p-4">
                           <div className="flex gap-4">
                             <div className="flex-1 space-y-2">
                               <Label className="text-xs text-zinc-500 uppercase">Notes</Label>
@@ -449,12 +542,18 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
                                 placeholder="Add notes here (auto-saves on blur)..."
                               />
                             </div>
-                            <div className="w-64 space-y-2 border-l pl-4 dark:border-zinc-800">
-                              <Label className="text-xs text-zinc-500 uppercase">Lead Details</Label>
+                            <div className="w-72 space-y-2 border-l pl-4 dark:border-zinc-800">
+                              <Label className="text-xs text-zinc-500 uppercase">Lead Details & AOE Status</Label>
                               <div className="text-sm space-y-1">
                                 {lead.industry && <p><span className="text-zinc-500">Industry:</span> {lead.industry}</p>}
                                 {lead.contact_linkedin && <p><span className="text-zinc-500">LinkedIn:</span> <a href={lead.contact_linkedin} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">View Profile</a></p>}
                                 <p><span className="text-zinc-500">Created:</span> {format(new Date(lead.created_at), "MMM d, yyyy")}</p>
+                                <p><span className="text-zinc-500">AOE Status:</span> {aoeStatusMap[lead.id]?.label || "Not Scanned"}</p>
+                                {aoeStatusMap[lead.id]?.reason && (
+                                  <p className="text-rose-600 dark:text-rose-400 font-medium text-xs mt-1 bg-rose-50 dark:bg-rose-950/30 p-2 rounded border border-rose-200 dark:border-rose-900/30">
+                                    <span className="font-semibold">Disqualification Reason:</span> {aoeStatusMap[lead.id].reason}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -468,6 +567,7 @@ export function LeadListClient({ initialLeads, profiles, currentUserId }: LeadLi
           </TableBody>
         </Table>
       </div>
+
 
       <Dialog open={isAddLeadOpen} onOpenChange={setIsAddLeadOpen}>
         <DialogContent className="sm:max-w-[500px]">

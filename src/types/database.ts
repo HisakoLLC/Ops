@@ -319,6 +319,7 @@ export type AOELeadStatus =
   | 'PENDING_REVIEW'
   | 'APPROVED'
   | 'REJECTED'
+  | 'DISQUALIFIED'
   | 'EMAIL_1_SENT'
   | 'EMAIL_2_SENT'
   | 'EMAIL_3_SENT'
